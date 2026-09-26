@@ -1,0 +1,34 @@
+{
+  "_comentario": "Modelo com dado INVENTADO. Copie para data/regras_privadas.json (fora do git) e troque pelos seus. Cada 'contem' e um trecho procurado na descricao e no nome da contraparte, sem acento e em minusculo. As suas regras rodam antes das genericas.",
+  "titular": {
+    "documento": "12345678900",
+    "nomes": ["fulana exemplo"]
+  },
+  "neutros": ["compra duplicada exemplo"],
+  "entradas": [
+    {"contem": "empresa exemplo", "tipo": "receita", "categoria": "Salario"},
+    {"contem": "seguradora exemplo", "tipo": "reembolso", "categoria": "Saude"},
+    {"contem": "comprador exemplo", "tipo": "receita_unica", "categoria": "Venda de equipamento usado", "valor_min": 290, "valor_max": 310},
+    {"contem": "cliente exemplo", "tipo": "receita", "categoria": "Servico prestado", "escopo": "pj"}
+  ],
+  "padroes": [
+    {"contem": "academia exemplo", "categoria": "Assinatura, academia", "essencialidade": "discricionario"},
+    {"contem": "streaming exemplo", "categoria": "Assinatura, streaming", "essencialidade": "discricionario"},
+    {"contem": "energia exemplo", "categoria": "Moradia, energia", "essencialidade": "fixo_compromissado"},
+    {"contem": "grafica modelo", "categoria": "Material de trabalho", "essencialidade": "discricionario", "escopo": "pj"}
+  ],
+  "divisoes": [
+    {
+      "contem": "imobiliaria exemplo",
+      "partes": [
+        {"proporcao": 0.5, "tipo": "gasto", "categoria": "Moradia, aluguel", "essencialidade": "fixo_compromissado"},
+        {"proporcao": 0.5, "tipo": "neutro", "categoria": "Parte de quem divide a casa"}
+      ]
+    }
+  ],
+  "assinaturas_grupos": [
+    {"grupo": "Streaming", "contem": "streaming exemplo"},
+    {"grupo": "Academia", "contem": "academia exemplo"},
+    {"grupo": "Cinema avulso", "contem": "cinema modelo", "esporadica": true}
+  ]
+}

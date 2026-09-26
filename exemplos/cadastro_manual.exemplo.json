@@ -1,0 +1,31 @@
+{
+  "_comentario": "Modelo com dado INVENTADO. Copie para data/cadastro_manual.json (fora do git) e preencha com o que voce le nos apps: o que a API nao traz. Datas DD/MM sem ano valem para a proxima ocorrencia.",
+  "lido_em": "2026-01-01",
+  "cartoes": [
+    {"fonte": "banco_a", "nome": "Banco A", "limite": 6000, "fatura_aberta": null, "fecha": 3, "vence": 10, "ultima_rotacao": null},
+    {"fonte": "banco_b", "nome": "Banco B", "limite": 3000, "fatura_aberta": 850.0, "fecha": 20, "vence": 27, "ultima_rotacao": "2026-01-15"}
+  ],
+  "dividas": [
+    {"nome": "Emprestimo pessoal Banco Exemplo", "tipo": "contrato", "parcela": 450.0, "parcelas_total": 12, "parcelas_pagas": 4, "proxima": "10/10", "nota": "debito automatico"},
+    {"nome": "Financiamento Exemplo", "tipo": "contrato", "saldo": 8200.0, "nota": "saldo lido no app"},
+    {"nome": "Emprestimo de um parente", "tipo": "informal", "saldo": 600.0, "proxima": "30/11", "nota": "combinado devolver ate o fim do ano"}
+  ],
+  "recebiveis": [
+    {"nome": "Venda de equipamento usado", "parcela": 300.0, "parcelas_total": 5, "recebidas": ["21/06", "22/07"], "nota": "Pix mensal do comprador"}
+  ],
+  "pontos": [
+    {"programa": "Programa de pontos Exemplo", "pts": 12000, "reais": 180.0, "expira": "15/12", "nota": "estimativa de R$ 15 por mil pontos"},
+    {"programa": "Cashback Exemplo", "reais": 42.5, "nota": "saldo em reais no app"}
+  ],
+  "assinaturas": [
+    {"nome": "Streaming Exemplo", "contem": "streaming exemplo", "valor": 39.9, "mensal": true, "detalhe": "plano padrao"},
+    {"nome": "Academia Exemplo", "contem": "academia exemplo", "valor": 119.9, "mensal": true, "detalhe": "plano mensal"}
+  ],
+  "notas_fiscais": {
+    "prazo_ir": "2027-05-29",
+    "itens": [
+      {"descricao": "Consulta Clinica Exemplo", "tem_nota": false, "sobe_sozinho": false},
+      {"descricao": "Plano de saude Exemplo", "tem_nota": true, "sobe_sozinho": true}
+    ]
+  }
+}

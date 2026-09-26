@@ -1,0 +1,14 @@
+# Contêiner dos scripts do Ember (rotina diaria e webhook dos botoes), pra rodar num servidor sempre ligado.
+FROM python:3.12.14-slim-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client openssl ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/*
+# fuso da rotina diaria e do TickTick; troque no build ou pelo EMBER_TZ do docker-compose.scripts.yml
+ARG EMBER_TZ=America/Sao_Paulo
+ENV TZ=${EMBER_TZ} EMBER_TZ=${EMBER_TZ} PYTHONUNBUFFERED=1
+# sem root: o repo montado em /app precisa pertencer a este uid (ver docker-compose.scripts.yml)
+ARG EMBER_UID=1000
+ARG EMBER_GID=1000
+RUN groupadd -g ${EMBER_GID} ember && useradd -u ${EMBER_UID} -g ember -M -s /usr/sbin/nologin ember
+USER ember
+WORKDIR /app
+CMD ["python3", "scripts/agendador.py"]

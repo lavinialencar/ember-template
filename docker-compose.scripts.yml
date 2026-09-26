@@ -1,0 +1,27 @@
+# Scripts do Ember num servidor (NAS ou qualquer maquina ligada): rotina diaria e webhook dos botoes dos alertas.
+# Uso: docker compose -f docker-compose.scripts.yml up -d --build
+# O repo inteiro (com data/ e .env) fica montado em /app: o contêiner le e escreve os mesmos arquivos da pasta.
+# network_mode host: alcanca o Postgres em localhost:5432 (docker-compose.yml) e serve o webhook na porta 8082,
+# que so o Tailscale alcanca. No .env: ALERTA_WEBHOOK_URL=http://<servidor>.<tailnet>.ts.net:8082/alerta e
+# ALERTA_WEBHOOK_TOKEN=<segredo de 32+ caracteres; sem ele o webhook nao sobe>. TICKTICK_TOKEN (e TICKTICK_PROJECT_ID)
+# sao opcionais. O webhook so escuta em EMBER_BIND (padrao 127.0.0.1): no servidor, EMBER_BIND=<IP dele no Tailscale>
+# (`tailscale ip -4`), nunca 0.0.0.0. O contêiner roda sem root (usuario ember, uid 1000): o dono de ./ no servidor
+# precisa ser esse uid, ou troque EMBER_UID/EMBER_GID no build pra casar com o dono da pasta.
+# Fuso: EMBER_TZ (padrao America/Sao_Paulo).
+services:
+  ember-scripts:
+    build:
+      context: .
+      dockerfile: Dockerfile.scripts
+      args:
+        EMBER_UID: ${EMBER_UID:-1000}
+        EMBER_GID: ${EMBER_GID:-1000}
+        EMBER_TZ: ${EMBER_TZ:-America/Sao_Paulo}
+    container_name: ember-scripts
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      TZ: ${EMBER_TZ:-America/Sao_Paulo}
+      EMBER_TZ: ${EMBER_TZ:-America/Sao_Paulo}
+    volumes:
+      - ./:/app

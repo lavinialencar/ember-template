@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16.15-alpine   # versao fixa; trocar so a minor, a major 16 e a do volume
+    container_name: ember-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ember
+      POSTGRES_USER: ember
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - ember_pg:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=128MB"
+      - "-c"
+      - "work_mem=8MB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "wal_buffers=4MB"
+      - "-c"
+      - "max_connections=20"
+      - "-c"
+      - "effective_cache_size=512MB"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "max_worker_processes=2"
+      - "-c"
+      - "autovacuum_max_workers=1"
+    ports:
+      - "127.0.0.1:5432:5432"
+
+volumes:
+  ember_pg:
+
+# Se o n8n (n8n/carga-diaria.json) roda em outro stack, junte este serviço na rede
+# Docker dele (ou use host networking), senão o n8n não alcança o Postgres pelo nome.

@@ -1,0 +1,28 @@
+# ntfy proprio num servidor (opcional; sem ele o Ember usa o ntfy.sh publico com topico secreto).
+# Uso: docker compose -f docker-compose.ntfy.yml up -d
+# Depois: NTFY_URL no .env do Ember aponta pra ca; no app do ntfy no celular, use o servidor proprio.
+# NTFY_UPSTREAM_BASE_URL faz celular iOS receber o aviso na hora (o push da Apple passa por um servidor central);
+# so o id da mensagem sobe pro ntfy.sh, nao o texto.
+services:
+  ntfy:
+    image: binwiederhier/ntfy:v2.28.0   # versao fixa; o Dependabot abre PR quando sair outra
+    container_name: ember-ntfy
+    restart: unless-stopped
+    command: ["serve"]
+    environment:
+      NTFY_BASE_URL: ${NTFY_BASE_URL}          # ex.: http://<servidor>.<tailnet>.ts.net:8081
+      NTFY_UPSTREAM_BASE_URL: https://ntfy.sh
+      NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
+      NTFY_AUTH_FILE: /var/lib/ntfy/user.db
+      NTFY_AUTH_DEFAULT_ACCESS: deny-all       # so entra com login ou token (NTFY_TOKEN no .env)
+    volumes:
+      - ntfy_cache:/var/cache/ntfy
+      - ntfy_lib:/var/lib/ntfy
+    ports:
+      # So escuta em NTFY_BIND (padrao 127.0.0.1). Pro celular alcancar pelo Tailscale:
+      # NTFY_BIND=<IP do servidor no Tailscale> (o 100.x.y.z de `tailscale ip -4`) no .env. Nunca 0.0.0.0.
+      - "${NTFY_BIND:-127.0.0.1}:8081:80"
+
+volumes:
+  ntfy_cache:
+  ntfy_lib:
