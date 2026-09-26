@@ -1,0 +1,300 @@
+{
+  "name": "Ember - Daily Pluggy load",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "daily-trigger",
+      "name": "Every day at 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pluggy.ai/auth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"clientId\": $credentials.pluggyApi.clientId, \"clientSecret\": $credentials.pluggyApi.clientSecret } }}"
+      },
+      "id": "auth-pluggy",
+      "name": "Authenticate with Pluggy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -980,
+        0
+      ],
+      "notes": "clientId/clientSecret live in the n8n credential (pluggyApi), never hardcoded here. The secret lives on the server, not in the repo."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Connections come from PLUGGY_ITEM_IDS, in the n8n environment (same format as Ember's .env):\n// \"banco_a:<itemId>,banco_b:<itemId>\". Connect through MeuPluggy: those itemIds do not expire.\n// GET /items without an id does not list (it is not a listing route), so the list comes from configuration.\n// n8n must let the Code node read the environment (N8N_BLOCK_ENV_ACCESS_IN_NODE=false).\nconst apiKey = $input.first().json.apiKey;\nconst raw = $env.PLUGGY_ITEM_IDS;\nif (!raw) throw new Error('Missing PLUGGY_ITEM_IDS in the n8n environment (e.g. banco_a:<itemId>,banco_b:<itemId>)');\nconst SOURCE = /^[a-z0-9_]{1,30}$/;\nconst UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;\nconst items = raw.split(',').map((p) => p.trim()).filter(Boolean).map((p) => {\n  const i = p.indexOf(':');\n  const source = p.slice(0, i).trim();\n  const itemId = p.slice(i + 1).trim().toLowerCase();\n  if (i < 0 || !SOURCE.test(source) || !UUID.test(itemId)) {\n    throw new Error('Invalid PLUGGY_ITEM_IDS: use source:itemId separated by commas');\n  }\n  return { source, itemId };\n});\nreturn items.map((it) => ({ json: { ...it, apiKey } }));"
+      },
+      "id": "list-items",
+      "name": "Known items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -760,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.pluggy.ai/items/{{ $json.itemId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "={{ $json.apiKey }}"
+            }
+          ]
+        }
+      },
+      "id": "check-item",
+      "name": "Check item status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -540,
+        -80
+      ],
+      "notes": "Health workflow: if status != UPDATED or lastUpdatedAt > 36h, the next node alerts."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "UPDATED",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "or"
+        }
+      },
+      "id": "item-with-problem",
+      "name": "Item healthy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.pluggy.ai/accounts?itemId={{ $json.itemId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "={{ $json.apiKey }}"
+            }
+          ]
+        }
+      },
+      "id": "fetch-accounts",
+      "name": "Fetch item accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "split-accounts",
+      "name": "One account at a time",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pages /v2/transactions by cursor (the 'next' field, not 'page'/'pageSize').\n// GET /transactions was deprecated in favor of this one.\n// 'next' is the WHOLE query string of the next page ('?accountId=...&after=...'),\n// not a loose token: use it as is, never build '&cursor=' on top of it.\n// Window: last 15 days, the upsert happens in the next node via dedup_hash.\nconst crypto = require('crypto');\nconst apiKey = $json.apiKey;\nconst accountId = $json.id;\nconst source = $json.source;\n\nconst fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)\n  .toISOString()\n  .slice(0, 10);\n\nlet url = `https://api.pluggy.ai/v2/transactions?accountId=${accountId}`;\nconst all = [];\n\nwhile (url) {\n  const resp = await this.helpers.httpRequest({\n    method: 'GET',\n    url,\n    headers: { 'X-API-KEY': apiKey },\n    json: true,\n  });\n  all.push(...resp.results);\n  url = resp.next ? `https://api.pluggy.ai/v2/transactions${resp.next}` : null;\n}\n\nconst recent = all.filter((t) => (t.date || '').slice(0, 10) >= fifteenDaysAgo);\n\n// Identical transactions on the same day (two R$230 Pix to the same recipient) have different IDs\n// at Pluggy but the same hash. Without a tiebreaker they merge in the upsert.\n// The ordinal counts the occurrence inside the group, in the order the API returns them.\n// Assumption: the API order is stable between runs.\nconst seen = new Map();\n\nreturn recent.map((t) => {\n  const installment = t.creditCardMetadata ? t.creditCardMetadata.installmentNumber : null;\n  const descriptionRaw = t.descriptionRaw || '';\n  const dateStr = (t.date || '').slice(0, 10);\n  const base = [accountId, dateStr, String(t.amount), descriptionRaw, installment != null ? String(installment) : '0'].join('|');\n  const ordinal = seen.get(base) || 0;\n  seen.set(base, ordinal + 1);\n  const dedupHash = crypto.createHash('md5').update(base + '|' + ordinal).digest('hex');\n\n  return {\n    json: {\n      dedup_hash: dedupHash,\n      pluggy_transaction_id: t.id,\n      date: dateStr,\n      accrual_date: dateStr,\n      amount: t.amount,\n      description_raw: descriptionRaw,\n      description: t.description || null,\n      source,\n      movement_type: t.creditCardMetadata ? 'credit_card' : 'account',\n      account_id: accountId,\n      installment_number: installment,\n      installments_total: t.creditCardMetadata ? t.creditCardMetadata.totalInstallments : null,\n      bill_id: t.creditCardMetadata ? t.creditCardMetadata.billId : null,\n      payload: t,\n    },\n  };\n});"
+      },
+      "id": "load-transactions",
+      "name": "Load transactions (v2, cursor)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO mart.transactions (dedup_hash, pluggy_transaction_id, date, accrual_date, amount, description_raw, description, source, movement_type, account_id, installment_number, installments_total, bill_id, payload)\nVALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)\nON CONFLICT (dedup_hash) DO UPDATE SET\n  amount = EXCLUDED.amount,\n  description_raw = EXCLUDED.description_raw,\n  payload = EXCLUDED.payload,\n  updated_at = now();",
+        "options": {
+          "queryReplacement": "={{ [$json.dedup_hash, $json.pluggy_transaction_id, $json.date, $json.accrual_date, $json.amount, $json.description_raw, $json.description, $json.source, $json.movement_type, $json.account_id, $json.installment_number, $json.installments_total, $json.bill_id, JSON.stringify($json.payload)] }}"
+        }
+      },
+      "id": "upsert-postgres",
+      "name": "Upsert into mart.transactions",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        340,
+        80
+      ],
+      "notes": "Postgres credential set up in n8n, pointing to the ember-postgres container from docker-compose."
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { alert: 'Connection with a problem', item: $json.connector?.name || $json.id, status: $json.status } }];"
+      },
+      "id": "build-alert",
+      "name": "Build alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        -160
+      ],
+      "notes": "TODO: turn this into a real TickTick task instead of only building the text."
+    }
+  ],
+  "connections": {
+    "Every day at 8am": {
+      "main": [
+        [
+          {
+            "node": "Authenticate with Pluggy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate with Pluggy": {
+      "main": [
+        [
+          {
+            "node": "Known items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Known items": {
+      "main": [
+        [
+          {
+            "node": "Check item status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check item status": {
+      "main": [
+        [
+          {
+            "node": "Item healthy?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Item healthy?": {
+      "main": [
+        [
+          {
+            "node": "Build alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch item accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch item accounts": {
+      "main": [
+        [
+          {
+            "node": "One account at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One account at a time": {
+      "main": [
+        [
+          {
+            "node": "Load transactions (v2, cursor)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load transactions (v2, cursor)": {
+      "main": [
+        [
+          {
+            "node": "Upsert into mart.transactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "meta": {
+    "instanceId": "ember"
+  }
+}

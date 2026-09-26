@@ -1,39 +1,39 @@
-# Política de segurança
+# Security policy
 
-## Versão suportada
+## Supported version
 
-Só a branch `main` recebe correção. Não há versões numeradas.
+Only the `main` branch gets fixes. There are no numbered versions.
 
-## Como relatar uma falha
+## How to report a vulnerability
 
-Relate em particular, pelo GitHub:
+Report it privately, through GitHub:
 
-1. Abra a aba **Security** do repositório.
-2. Clique em **Report a vulnerability**.
-3. Descreva o problema, como reproduzir e o impacto que você vê.
+1. Open the repository's **Security** tab.
+2. Click **Report a vulnerability**.
+3. Describe the problem, how to reproduce it and the impact you see.
 
-Não abra issue pública, pull request ou discussão sobre a falha antes de uma correção sair.
+Do not open a public issue, pull request or discussion about the vulnerability before a fix is out.
 
-Não mande dado financeiro real no relato. Se precisar de um exemplo, use a demo (`python3 scripts/gerar_exemplo.py`) ou dado inventado.
+Do not send real financial data in the report. If you need an example, use the demo (`python3 scripts/make_demo.py`) or made-up data.
 
-## O que esperar
+## What to expect
 
-- Uma primeira resposta assim que alguém puder ler. O projeto é mantido por voluntários, sem prazo garantido.
-- Se a falha for confirmada, a correção sai na `main` e o aviso de segurança é publicado depois, com crédito a você, se quiser.
+- A first reply as soon as someone can read it. The project is maintained by volunteers, with no guaranteed timeline.
+- If the vulnerability is confirmed, the fix lands on `main` and the security advisory is published afterwards, with credit to you if you want it.
 
-## Escopo
+## Scope
 
-Dentro:
+In scope:
 
-- os scripts em `scripts/` e `tools/`;
-- o webhook dos botões (`scripts/agendador.py`) e a assinatura dos botões (`scripts/notificar.py`);
-- o painel gerado (`scripts/painel_template.html`, `scripts/painel_montar.py`): CSP, SRI, escape;
-- os arquivos de compose, o `Dockerfile.scripts`, as migrations em `sql/` e o fluxo em `n8n/`;
-- o CI em `.github/`;
-- a documentação, quando ela ensina a fazer algo inseguro.
+- the scripts in `scripts/` and `tools/`;
+- the button webhook (`scripts/scheduler.py`) and the button signature (`scripts/notify.py`);
+- the generated dashboard (`scripts/dashboard_template.html`, `scripts/dashboard_build.py`): CSP, SRI, escaping;
+- the compose files, `Dockerfile.scripts`, the migrations in `sql/` and the workflow in `n8n/`;
+- CI in `.github/`;
+- the documentation, when it teaches you to do something unsafe.
 
-Fora:
+Out of scope:
 
-- falhas na Pluggy, no MeuPluggy, no ntfy, no Tailscale, no n8n, no Postgres, na BrasilAPI ou no TickTick (relate a quem mantém cada um);
-- ataques que já partem de uma máquina comprometida ou do seu usuário do sistema (veja [docs/09-seguranca.md](docs/09-seguranca.md#o-que-não-está-protegido));
-- instalação que contraria a documentação, como abrir porta em `0.0.0.0` ou publicar o painel.
+- vulnerabilities in Pluggy (Open Finance data aggregator), MeuPluggy (Pluggy's free personal connection app), ntfy, Tailscale, n8n, Postgres, BrasilAPI (free public API for Brazilian data) or TickTick (report them to each maintainer);
+- attacks that start from a compromised machine or from your system user (see [docs/09-security.md](docs/09-security.md#what-is-not-protected));
+- setups that go against the documentation, like opening a port on `0.0.0.0` or publishing the dashboard.

@@ -1,106 +1,106 @@
 # Backup
 
-`scripts/backup.py` junta `data/` e `.env` num `.tar.gz` e cifra com a sua chave pública (`openssl cms`, AES-256). O resultado vai pra `BACKUP_DESTINO`, uma pasta que pode ser sincronizada com a nuvem.
+`scripts/backup.py` packs `data/` and `.env` into a `.tar.gz` and encrypts it with your public key (`openssl cms`, AES-256). The result goes to `BACKUP_DEST`, a folder that can sync to the cloud.
 
-A ideia é simples: a máquina que roda o Ember só tem o certificado público, que sabe trancar mas não sabe abrir. A chave privada, que abre, fica fora da máquina, no seu gerenciador de senhas. Quem achar o arquivo na nuvem, ou roubar a máquina, não lê o backup.
+The idea is simple: the machine that runs Ember only has the public certificate, which can lock but cannot unlock. The private key, which unlocks, stays off the machine, in your password manager. Someone who finds the file in the cloud, or steals the machine, cannot read the backup.
 
-## O que você precisa
+## What you need
 
-- OpenSSL 3. Confira com `openssl version`.
-- No macOS, o `openssl` do sistema é LibreSSL e falha com chave de curva elíptica (`error setting recipientinfo`). Instale o do Homebrew (`brew install openssl@3`) e deixe ele primeiro no `PATH`, inclusive no agendamento (veja [02-instalar.md](02-instalar.md#macos-com-launchd)). Outra saída: aponte a variável `OPENSSL` pro binário certo (`OPENSSL=$(brew --prefix openssl@3)/bin/openssl`). O `backup.py` confere a versão antes de cifrar e para com uma mensagem clara se não for OpenSSL 3.
-- O contêiner `ember-scripts` já vem com OpenSSL 3.
+- OpenSSL 3. Check with `openssl version`.
+- On macOS, the system `openssl` is LibreSSL and fails with elliptic curve keys (`error setting recipientinfo`). Install the Homebrew one (`brew install openssl@3`) and put it first in your `PATH`, including in the schedule (see [02-install.md](02-install.md#macos-with-launchd)). Another option: point the `OPENSSL` variable to the right binary (`OPENSSL=$(brew --prefix openssl@3)/bin/openssl`). `backup.py` checks the version before encrypting and stops with a clear message if it is not OpenSSL 3.
+- The `ember-scripts` container already ships with OpenSSL 3.
 
-## 1. Gerar o par de chaves
+## 1. Generate the key pair
 
-Faça num computador de confiança, numa pasta temporária só sua:
+Do this on a trusted computer, in a temporary folder only you can access:
 
 ```sh
-mkdir -m 700 ~/ember-chave && cd ~/ember-chave
-openssl ecparam -name secp384r1 -genkey -noout -out privada.pem
-openssl req -new -x509 -key privada.pem -out backup_cert.pem -days 3650 -subj "/CN=Ember backup"
+mkdir -m 700 ~/ember-key && cd ~/ember-key
+openssl ecparam -name secp384r1 -genkey -noout -out private.pem
+openssl req -new -x509 -key private.pem -out backup_cert.pem -days 3650 -subj "/CN=Ember backup"
 ```
 
-- `privada.pem` é a chave privada (curva P-384). Ela abre os backups.
-- `backup_cert.pem` é o certificado autoassinado com a chave pública. Ele só tranca.
+- `private.pem` is the private key (P-384 curve). It opens the backups.
+- `backup_cert.pem` is the self-signed certificate with the public key. It only locks.
 
-## 2. Guardar cada metade no lugar certo
+## 2. Keep each half in the right place
 
-1. Abra `privada.pem` e guarde o conteúdo inteiro no seu gerenciador de senhas, como nota segura ou anexo.
-2. Copie o certificado pra máquina do Ember:
+1. Open `private.pem` and store its full content in your password manager, as a secure note or an attachment.
+2. Copy the certificate to the Ember machine:
 
    ```sh
-   cp ~/ember-chave/backup_cert.pem /caminho/do/ember-template/scripts/backup_cert.pem
+   cp ~/ember-key/backup_cert.pem /path/to/ember-template/scripts/backup_cert.pem
    ```
 
-   Esse é o caminho padrão. Se preferir outro lugar, aponte `BACKUP_CERT` no `.env`. O `.gitignore` já ignora `*.pem`, `*.key` e `*.cms`.
+   This is the default path. If you prefer another place, set `BACKUP_CERT` in `.env`. `.gitignore` already ignores `*.pem`, `*.key` and `*.cms`.
 
-3. Apague a pasta temporária:
+3. Delete the temporary folder:
 
    ```sh
-   rm -rf ~/ember-chave
+   rm -rf ~/ember-key
    ```
 
-A chave privada não deve ficar em disco na máquina do Ember, nem em `data/`, nem no repositório.
+The private key must not stay on disk on the Ember machine, not in `data/`, and not in the repository.
 
-## 3. Ligar o backup
+## 3. Turn on the backup
 
-No `.env`:
+In `.env`:
 
 ```
-BACKUP_DESTINO=/caminho/da/pasta/de/backup
+BACKUP_DEST=/path/to/backup/folder
 ```
 
-Teste:
+Test it:
 
 ```sh
 python3 scripts/backup.py
 ```
 
-Deve aparecer `backup: ember-AAAA-MM-DD.tar.gz.cms (N KB), 1 guardados`. Sem `BACKUP_DESTINO` ou sem o certificado, o script para com uma mensagem clara. Pra rodar a rotina sem backup: `atualizar.py --sem-backup`.
+You should see `backup: ember-YYYY-MM-DD.tar.gz.cms (N KB), 1 kept`. Without `BACKUP_DEST` or without the certificate, the script stops with a clear message. To run the routine without a backup: `update.py --no-backup`.
 
-## Retenção
+## Retention
 
-- Um arquivo por dia: `ember-AAAA-MM-DD.tar.gz.cms`. Rodar duas vezes no mesmo dia sobrescreve o do dia.
-- Ficam os 12 mais recentes. Os mais velhos são apagados a cada rodada.
-- Com a rotina diária, isso dá uns 12 dias de histórico. Se quiser guardar mais, copie um arquivo por mês pra outro lugar.
+- One file per day: `ember-YYYY-MM-DD.tar.gz.cms`. Running twice on the same day overwrites that day's file.
+- The 12 most recent are kept. Older ones are deleted on each run.
+- With the daily routine, that gives about 12 days of history. If you want to keep more, copy one file per month somewhere else.
 
-## Restaurar
+## Restore
 
-Teste a restauração uma vez logo depois de configurar. Backup que nunca foi aberto não é backup.
+Test a restore once, right after you set it up. A backup you have never opened is not a backup.
 
-1. Copie a chave privada do gerenciador de senhas pra um arquivo temporário:
-
-   ```sh
-   mkdir -m 700 ~/ember-restaurar && cd ~/ember-restaurar
-   # cole o conteúdo em privada.pem, com permissão 600
-   ```
-
-2. Decifre e extraia:
+1. Copy the private key from your password manager to a temporary file:
 
    ```sh
-   openssl cms -decrypt -inform DER -in /caminho/ember-AAAA-MM-DD.tar.gz.cms -inkey privada.pem | tar xz
+   mkdir -m 700 ~/ember-restore && cd ~/ember-restore
+   # paste the content into private.pem, with permission 600
    ```
 
-   Saem `data/` e `.env`, como estavam no dia do backup.
+2. Decrypt and extract:
 
-3. Copie `data/` e `.env` pro repositório (com o Ember parado) e confira as permissões:
+   ```sh
+   openssl cms -decrypt -inform DER -in /path/ember-YYYY-MM-DD.tar.gz.cms -inkey private.pem | tar xz
+   ```
+
+   You get `data/` and `.env`, as they were on the day of the backup.
+
+3. Copy `data/` and `.env` into the repository (with Ember stopped) and check the permissions:
 
    ```sh
    chmod 700 data && chmod 600 .env
    ```
 
-4. Apague a chave temporária:
+4. Delete the temporary key:
 
    ```sh
-   rm ~/ember-restaurar/privada.pem
+   rm ~/ember-restore/private.pem
    ```
 
-## Se perder a chave privada
+## If you lose the private key
 
-Os backups antigos ficam ilegíveis pra sempre. Gere um par novo (passo 1), troque o certificado e faça um backup novo na hora.
+Old backups become unreadable forever. Generate a new pair (step 1), replace the certificate and make a new backup right away.
 
-## Se a chave privada vazar
+## If the private key leaks
 
-Gere um par novo, troque o certificado e apague os backups antigos do destino: quem tem a chave antiga abre todos eles. Troque também os segredos do `.env`, porque ele vai dentro do backup.
+Generate a new pair, replace the certificate and delete the old backups from the destination: whoever has the old key can open all of them. Also rotate the secrets in `.env`, because it is inside the backup.
 
-Próximo: [09-seguranca.md](09-seguranca.md).
+Next: [09-security.md](09-security.md).

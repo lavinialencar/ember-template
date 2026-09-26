@@ -1,91 +1,93 @@
 # Ember
 
-Ember é um pipeline de finanças pessoais pra quem tem conta em banco no Brasil. Ele lê o seu extrato e as faturas dos cartões pelo Open Finance (Pluggy, com a conexão feita pelo MeuPluggy), classifica cada transação com regras que você controla, avisa no celular quando algo pede ação e monta um painel HTML que abre no seu navegador. Tudo roda em Python puro, sem dependência instalada, e o seu dado fica em arquivos JSON na sua máquina. Postgres, n8n e um servidor em casa são opcionais.
+This project targets Brazilian bank accounts through Open Finance Brasil (Brazil's open banking standard).
 
-**Pra quem é.** Pra quem quer ver o próprio dinheiro com regras próprias, sem entregar senha de banco a um app e sem mandar o extrato pra nuvem de ninguém. Você precisa saber rodar um comando no terminal e editar um arquivo JSON. Não é app, não é multiusuário e não dá conselho financeiro.
+Ember is a personal-finance pipeline for people with bank accounts in Brazil. It reads your statement and your credit card bills through Open Finance, using Pluggy (an Open Finance data aggregator) with the connection made through MeuPluggy (Pluggy's free personal connection app). It classifies each transaction with rules you control, pings your phone when something needs action, and builds an HTML dashboard that opens in your browser. Everything runs in plain Python with no installed dependencies, and your data stays in JSON files on your machine. Postgres, n8n and a home server are optional.
 
-![Arquitetura do Ember: bancos, Pluggy, sua máquina, alertas no celular, painel e backup cifrado](assets/arquitetura.svg)
+**Who it is for.** People who want to see their own money with their own rules, without giving a bank password to an app and without sending their statement to someone else's cloud. You need to know how to run a command in the terminal and edit a JSON file. It is not an app, it is not multi-user and it does not give financial advice.
 
-## Rode a demo em 2 minutos
+![Ember architecture: banks, Pluggy, your machine, phone alerts, dashboard and encrypted backup](assets/architecture.svg)
 
-Só precisa de `python3` (3.10 ou mais novo). Não precisa de conta em lugar nenhum: a demo inventa 12 meses de dois bancos fictícios.
+## Run the demo in 2 minutes
+
+You only need `python3` (3.10 or newer). You don't need an account anywhere: the demo makes up 12 months of data from two fictional banks.
 
 ```sh
-python3 scripts/gerar_exemplo.py && python3 scripts/atualizar.py --sem-api --sem-push --sem-backup
+python3 scripts/make_demo.py && python3 scripts/update.py --no-api --no-push --no-backup
 ```
 
-Depois abra `data/painel.html` no navegador.
+Then open `data/dashboard.html` in your browser.
 
-- `--sem-api` não chama a Pluggy, `--sem-push` não manda nada pro celular, `--sem-backup` não grava backup.
-- O gerador escreve uns 570 lançamentos inventados (dois bancos, `banco_a` e `banco_b`, com faturas, contas e status das conexões) e copia os dois modelos de `exemplos/` pra `data/`.
-- Ele recusa sobrescrever um `data/` que já tem `transacoes.json`. Use `--forcar` só se esse `data/` for de demo. `--destino PASTA` grava em outro lugar.
-- O painel busca o Chart.js no cdnjs e as fontes no Google Fonts. Sem internet, o texto aparece e os gráficos não.
+- `--no-api` does not call Pluggy, `--no-push` sends nothing to your phone, `--no-backup` writes no backup.
+- The generator writes about 570 made-up entries (two banks, `banco_a` and `banco_b`, with bills, accounts and connection status) and copies the two templates from `examples/` to `data/`.
+- It refuses to overwrite a `data/` that already has `transactions.json`. Use `--force` only if that `data/` holds demo data. `--dest FOLDER` writes somewhere else.
+- The dashboard loads Chart.js from cdnjs and the fonts from Google Fonts. Without internet, the text shows up and the charts don't.
 
-![Painel da demo](assets/painel-demo.png)
+![Demo dashboard](assets/painel-demo.png)
 
-## Plugar o seu
+## Plug in your own
 
-Siga os guias em ordem:
+Follow the guides in order:
 
-1. [Como funciona](docs/01-como-funciona.md): a arquitetura e as decisões.
-2. [Instalar](docs/02-instalar.md): conta na Pluggy, conexão pelo MeuPluggy, `.env`, primeira carga e agendamento.
-3. [Regras](docs/03-regras.md): como cada transação ganha tipo e categoria, e como diminuir a zona cinza.
-4. [Cadastro manual](docs/04-cadastro-manual.md): o que a API não traz (dívidas, pontos, recebíveis).
-5. [Painel](docs/05-painel.md): o que cada seção mostra.
-6. [Alertas](docs/06-alertas.md): push pelo ntfy, botões assinados, TickTick opcional.
-7. [Servidor em casa](docs/07-servidor-em-casa.md): Docker, Postgres, ntfy próprio, n8n, Tailscale.
-8. [Backup](docs/08-backup.md): par de chaves, backup cifrado e restauração.
-9. [Segurança](docs/09-seguranca.md): modelo de ameaça e checklist.
-10. [Desenvolver](docs/10-desenvolver.md): testes, trava de dado pessoal e como contribuir.
+1. [How it works](docs/01-how-it-works.md): the architecture and the decisions.
+2. [Install](docs/02-install.md): Pluggy account, connection through MeuPluggy, `.env`, first load and scheduling.
+3. [Rules](docs/03-rules.md): how each transaction gets a type and a category, and how to shrink the gray zone.
+4. [Manual records](docs/04-manual-records.md): what the API doesn't bring (debts, points, receivables).
+5. [Dashboard](docs/05-dashboard.md): what each section shows.
+6. [Alerts](docs/06-alerts.md): push through ntfy, signed buttons, optional TickTick.
+7. [Home server](docs/07-home-server.md): Docker, Postgres, your own ntfy, n8n, Tailscale.
+8. [Backup](docs/08-backup.md): key pair, encrypted backup and restore.
+9. [Security](docs/09-security.md): threat model and checklist.
+10. [Development](docs/10-development.md): tests, personal-data guard and how to contribute.
 
-## Segurança, em resumo
+## Security, in short
 
-- O Ember nunca recebe a senha do seu banco. Na conexão pelo Open Finance, o consentimento acontece no app do banco.
-- `data/` e `.env` ficam fora do git e com permissão só pro dono (0600).
-- O push não leva valor, nome de loja, de pessoa, de cartão nem de banco. O detalhe fica no painel.
-- Nenhuma porta abre pra internet: tudo escuta em `127.0.0.1` ou no IP do Tailscale.
-- O backup sai cifrado com a sua chave pública. A privada fica fora da máquina.
+- Ember never receives your bank password. With an Open Finance connection, consent happens in your bank's app.
+- `data/` and `.env` stay out of git, with owner-only permissions (0600).
+- The push carries no amount and no name of a merchant, person, card or bank. The details stay in the dashboard.
+- No port opens to the internet: everything listens on `127.0.0.1` or on the Tailscale IP.
+- The backup leaves encrypted with your public key. The private key stays off the machine.
 
-Leia [docs/09-seguranca.md](docs/09-seguranca.md) antes de ligar o webhook dos botões. Pra relatar uma falha, veja [SECURITY.md](SECURITY.md).
+Read [docs/09-security.md](docs/09-security.md) before turning on the button webhook. To report a flaw, see [SECURITY.md](SECURITY.md).
 
-## Estrutura
+## Structure
 
 ```
 ember-template/
-  assets/              diagramas
-  docs/                guias numerados
-  exemplos/            modelos de regras e cadastro, com dado inventado
-  n8n/                 fluxo opcional de carga no Postgres
-  scripts/             a rotina, em Python só com biblioteca padrão
-  sql/                 migrations do Postgres opcional
-  tests/               unittest, só dado sintético, sem rede
-  tools/               trava de dado pessoal
-  data/                o seu dado; criado na primeira rodada, fora do git
-  .env.example         modelo das variáveis
+  assets/              diagrams
+  docs/                numbered guides
+  examples/            rule and records templates, with made-up data
+  n8n/                 optional workflow to load into Postgres
+  scripts/             the routine, in Python with the standard library only
+  sql/                 migrations for the optional Postgres
+  tests/               unittest, synthetic data only, no network
+  tools/               personal-data guard
+  data/                your data; created on the first run, out of git
+  .env.example         template for the variables
   docker-compose.yml           Postgres
-  docker-compose.ntfy.yml      ntfy próprio
-  docker-compose.scripts.yml   rotina diária e webhook num servidor
-  Dockerfile.scripts           contêiner dos scripts, sem root
+  docker-compose.ntfy.yml      your own ntfy
+  docker-compose.scripts.yml   daily routine and webhook on a server
+  Dockerfile.scripts           container for the scripts, no root
 ```
 
-## Limitações
+## Limitations
 
-O que o Open Finance, pela Pluggy e pelo MeuPluggy, não entrega bem, e como o Ember contorna:
+What Open Finance, through Pluggy and MeuPluggy, doesn't deliver well, and how Ember works around it:
 
-| O que falta | Como fica no Ember |
+| What's missing | How Ember handles it |
 |---|---|
-| Empréstimo e financiamento: nem todo produto de crédito aparece como empréstimo na API, e o Ember não lê essa rota | você registra em `dividas`, no cadastro manual |
-| Pontos, milhas e cashback | `pontos`, no cadastro manual |
-| Quem deve pra você | `recebiveis`, no cadastro manual |
-| Valor da fatura ainda aberta (a API só devolve fatura fechada) | estimado pelas compras, ou `fatura_aberta` lido no app |
-| O que já foi pago de cada fatura (vem vazio) | estimado pelos pagamentos no extrato; confirme no app |
-| Parcelas da mesma compra não têm chave comum | cada parcela conta no mês da fatura em que cai |
-| Histórico: 12 meses só na hora em que a conexão é criada | a base local guarda o que já veio; não existe recarga depois |
-| Atualização uma vez por dia | compra estranha pode ser avisada até 24 h depois; o bloqueio na hora é o app do banco |
-| Categoria da Pluggy pode mudar ou sumir | as suas regras e as genéricas vêm antes; a categoria da Pluggy é só a penúltima tentativa |
+| Loans and financing: not every credit product shows up as a loan in the API, and Ember doesn't read that route | you record it in `debts`, in the manual records |
+| Points, miles and cashback | `points`, in the manual records |
+| Who owes you | `receivables`, in the manual records |
+| Amount of the bill still open (the API only returns closed bills) | estimated from purchases, or `open_bill` read from the app |
+| What has already been paid on each bill (comes back empty) | estimated from the payments in the statement; confirm in the app |
+| Installments of the same purchase have no common key | each installment counts in the month of the bill it falls on |
+| History: 12 months only at the moment the connection is created | the local store keeps what already came in; there is no reload later |
+| Updates once a day | a strange purchase may be flagged up to 24 h later; blocking it on the spot is the bank app's job |
+| Pluggy's category can change or disappear | your rules and the generic ones come first; Pluggy's category is only the second-to-last attempt |
 
-Também não tem: app de celular, login, vários usuários, orçamento por meta ou importação de OFX e CSV.
+Also not included: a phone app, login, multiple users, goal-based budgeting, or OFX and CSV import.
 
-## Licença
+## License
 
 [MIT](LICENSE). Copyright (c) 2026 Ember contributors.

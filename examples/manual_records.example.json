@@ -1,0 +1,31 @@
+{
+  "_comment": "Template with MADE-UP data. Copy to data/manual_records.json (outside git) and fill it in with what you read in the apps: what the API does not bring. DD/MM dates without a year apply to the next occurrence.",
+  "read_on": "2026-01-01",
+  "cards": [
+    {"source": "banco_a", "name": "Banco A", "limit": 6000, "open_bill": null, "closes": 3, "due": 10, "last_rotation": null},
+    {"source": "banco_b", "name": "Banco B", "limit": 3000, "open_bill": 850.0, "closes": 20, "due": 27, "last_rotation": "2026-01-15"}
+  ],
+  "debts": [
+    {"name": "Personal loan Banco Exemplo", "type": "contract", "installment": 450.0, "installments_total": 12, "installments_paid": 4, "next_due": "10/10", "note": "automatic debit"},
+    {"name": "Financiamento Exemplo", "type": "contract", "balance": 8200.0, "note": "balance read in the app"},
+    {"name": "Loan from a relative", "type": "informal", "balance": 600.0, "next_due": "30/11", "note": "agreed to pay back by year end"}
+  ],
+  "receivables": [
+    {"name": "Used equipment sale", "installment": 300.0, "installments_total": 5, "received": ["21/06", "22/07"], "note": "monthly Pix from the buyer"}
+  ],
+  "points": [
+    {"program": "Programa de pontos Exemplo", "pts": 12000, "brl": 180.0, "expires": "15/12", "note": "estimate of R$ 15 per thousand points"},
+    {"program": "Cashback Exemplo", "brl": 42.5, "note": "balance in reais in the app"}
+  ],
+  "subscriptions": [
+    {"name": "Streaming Exemplo", "contains": "streaming exemplo", "amount": 39.9, "monthly": true, "detail": "standard plan"},
+    {"name": "Academia Exemplo", "contains": "academia exemplo", "amount": 119.9, "monthly": true, "detail": "monthly plan"}
+  ],
+  "tax_receipts": {
+    "tax_deadline": "2027-05-29",
+    "items": [
+      {"description": "Consulta Clinica Exemplo", "has_receipt": false, "auto_uploaded": false},
+      {"description": "Plano de saude Exemplo", "has_receipt": true, "auto_uploaded": true}
+    ]
+  }
+}

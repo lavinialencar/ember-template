@@ -1,4 +1,4 @@
-"""Base dos testes: so dado sintetico, numa pasta temporaria. Nada aqui toca data/ nem a rede."""
+"""Test base: synthetic data only, in a temporary folder. Nothing here touches data/ or the network."""
 
 import json
 import os
@@ -8,27 +8,27 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
 
-import notificar  # noqa: E402
+import notify  # noqa: E402
 
 TOKEN = "t" * 40
-ALERTAS = [
-    {"chave": "suspeita-abc-123", "nivel": "vencido", "titulo": "Compra estranha no cartao CARTAO_X: LOJA_Y",
-     "detalhe": "LOJA_Y", "curto": "CARTAO_X, LOJA_Y (ramo novo).", "acao": True},
-    {"chave": "minimo-banco_a-2026-10-05", "nivel": "atencao", "titulo": "t", "detalhe": "d", "curto": "CARTAO_X vence dia 05/10.", "acao": True},
-    {"chave": "conexao-banco_b", "nivel": "vencido", "titulo": "Conexao parada: banco_b", "detalhe": "d", "acao": True},
+ALERTS = [
+    {"key": "suspicious-abc-123", "level": "overdue", "title": "Suspicious purchase on card CARD_X: SHOP_Y",
+     "detail": "SHOP_Y", "short": "CARD_X, SHOP_Y (new category).", "action": True},
+    {"key": "minimum-banco_a-2026-10-05", "level": "warning", "title": "t", "detail": "d", "short": "CARD_X due Oct 05.", "action": True},
+    {"key": "connection-banco_b", "level": "overdue", "title": "Connection stalled: banco_b", "detail": "d", "action": True},
 ]
 
 
-class ComRaizTemp(unittest.TestCase):
+class WithTempRoot(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self.raiz = self.tmp.name
-        os.makedirs(os.path.join(self.raiz, "data"))
-        with open(os.path.join(self.raiz, "data", "alertas.json"), "w", encoding="utf-8") as f:
-            json.dump({"itens": ALERTAS}, f)
-        self._raiz_antiga = notificar.RAIZ
-        notificar.RAIZ = self.raiz
+        self.root = self.tmp.name
+        os.makedirs(os.path.join(self.root, "data"))
+        with open(os.path.join(self.root, "data", "alerts.json"), "w", encoding="utf-8") as f:
+            json.dump({"items": ALERTS}, f)
+        self._old_root = notify.ROOT
+        notify.ROOT = self.root
 
     def tearDown(self):
-        notificar.RAIZ = self._raiz_antiga
+        notify.ROOT = self._old_root
         self.tmp.cleanup()

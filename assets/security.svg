@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" role="img" aria-labelledby="t d" font-family="IBM Plex Sans, Helvetica Neue, Arial, sans-serif">
+  <title id="t">Ember trust zones</title>
+  <desc id="d">Three zones. Internet: Pluggy, BrasilAPI, ntfy.sh, cdnjs and the cloud folder. Tailscale tailnet: the phone and your machine or server. On the machine: .env and data with 0600 permissions and kept out of git, dashboard.html with CSP and SRI, and the ports of the webhook, the self-hosted ntfy and Postgres bound to 127.0.0.1 or the Tailscale IP. Flows: 1 HTTPS to Pluggy, 2 only company CNPJs to BrasilAPI, 3 push with no amount or name to ntfy.sh, 4 Chart.js with SRI, 5 encrypted backup to the cloud, 6 the phone calls the webhook with a token. No port is open to the internet. The backup private key lives in a password manager, off the machine. It does not protect against a compromised machine and does not hide ntfy.sh metadata.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1F4E8C"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#454B55"/>
+    </marker>
+    <symbol id="bank" viewBox="0 0 48 48">
+      <path d="M5 17 L24 6 L43 17 Z" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M12 21 V36 M20 21 V36 M28 21 V36 M36 21 V36" stroke="#1F4E8C" stroke-width="3"/>
+      <rect x="6" y="38" width="36" height="4" fill="#1F4E8C"/>
+    </symbol>
+    <symbol id="cloud" viewBox="0 0 48 48">
+      <path d="M14 36 H35 A8 8 0 0 0 36 20 A11 11 0 0 0 15 18 A9 9 0 0 0 14 36 Z" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="phone" viewBox="0 0 48 64">
+      <rect x="8" y="3" width="32" height="58" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5"/>
+      <rect x="12" y="10" width="24" height="40" fill="#C4D7EE"/>
+      <path d="M20 55 H28" stroke="#1F4E8C" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="cylinder" viewBox="0 0 48 48">
+      <path d="M8 10 V38 A16 5 0 0 0 40 38 V10" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5"/>
+      <ellipse cx="24" cy="10" rx="16" ry="5" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5"/>
+      <path d="M8 24 A16 5 0 0 0 40 24" fill="none" stroke="#1F4E8C" stroke-width="2"/>
+    </symbol>
+    <symbol id="terminal" viewBox="0 0 48 48">
+      <rect x="4" y="8" width="40" height="32" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5"/>
+      <path d="M4 15 H44" stroke="#1F4E8C" stroke-width="2"/>
+      <path d="M11 23 L17 28 L11 33 M21 33 H30" fill="none" stroke="#1F4E8C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="filter" viewBox="0 0 48 48">
+      <path d="M6 8 H42 L28 26 V40 L20 36 V26 Z" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="bell" viewBox="0 0 48 48">
+      <path d="M12 34 V22 A12 12 0 0 1 36 22 V34 L40 38 H8 Z" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M20 42 A4 4 0 0 0 28 42" fill="none" stroke="#1F4E8C" stroke-width="2.5"/>
+    </symbol>
+    <symbol id="chart" viewBox="0 0 48 48">
+      <rect x="4" y="6" width="40" height="36" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5"/>
+      <rect x="11" y="26" width="6" height="10" fill="#86AEDB"/>
+      <rect x="21" y="18" width="6" height="18" fill="#3F78BD"/>
+      <rect x="31" y="22" width="6" height="14" fill="#1F4E8C"/>
+    </symbol>
+    <symbol id="lock" viewBox="0 0 48 48">
+      <path d="M15 22 V15 A9 9 0 0 1 33 15 V22" fill="none" stroke="#1F4E8C" stroke-width="3"/>
+      <rect x="10" y="22" width="28" height="20" rx="3" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5"/>
+      <circle cx="24" cy="31" r="3" fill="#1F4E8C"/>
+    </symbol>
+    <symbol id="server" viewBox="0 0 48 48">
+      <rect x="6" y="6" width="36" height="16" rx="2" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5"/>
+      <rect x="6" y="26" width="36" height="16" rx="2" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5"/>
+      <circle cx="13" cy="14" r="2" fill="#1F4E8C"/><circle cx="13" cy="34" r="2" fill="#1F4E8C"/>
+      <path d="M22 14 H36 M22 34 H36" stroke="#86AEDB" stroke-width="2.5"/>
+    </symbol>
+    <symbol id="gear" viewBox="0 0 48 48">
+      <path d="M24 6 L28 10 L34 8 L35 14 L41 16 L39 22 L43 26 L38 30 L39 36 L33 36 L30 42 L24 39 L18 42 L15 36 L9 36 L10 30 L5 26 L9 22 L7 16 L13 14 L14 8 L20 10 Z" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="24" cy="24" r="6" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5"/>
+    </symbol>
+  
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#B23A3A"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2F7D5A"/>
+    </marker>
+    <symbol id="clock" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="17" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5"/>
+      <path d="M24 13 V24 L31 29" fill="none" stroke="#1F4E8C" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="document" viewBox="0 0 48 48">
+      <path d="M11 5 H30 L38 13 V43 H11 Z" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M30 5 V13 H38" fill="none" stroke="#1F4E8C" stroke-width="2"/>
+      <path d="M17 22 H32 M17 29 H32 M17 36 H27" stroke="#86AEDB" stroke-width="2.5"/>
+    </symbol>
+    <symbol id="key" viewBox="0 0 48 48">
+      <circle cx="15" cy="24" r="8" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5"/>
+      <path d="M23 24 H42 M36 24 V31 M42 24 V30" fill="none" stroke="#1F4E8C" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="blocked" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="16" fill="#FFFFFF" stroke="#B23A3A" stroke-width="3"/>
+      <path d="M13 13 L35 35" stroke="#B23A3A" stroke-width="3"/>
+    </symbol>
+    <symbol id="finger" viewBox="0 0 48 48">
+      <rect x="10" y="10" width="28" height="18" rx="4" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5"/>
+      <path d="M24 34 V20" stroke="#1F4E8C" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="24" cy="38" r="4" fill="#1F4E8C"/>
+    </symbol>
+    <symbol id="tunnel" viewBox="0 0 48 48">
+      <circle cx="12" cy="24" r="6" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5"/>
+      <circle cx="36" cy="24" r="6" fill="#C4D7EE" stroke="#1F4E8C" stroke-width="2.5"/>
+      <path d="M18 24 H30" stroke="#1F4E8C" stroke-width="2.5" stroke-dasharray="3 3"/>
+      <path d="M12 12 V6 M36 12 V6 M12 42 V36 M36 42 V36" stroke="#86AEDB" stroke-width="2.5"/>
+    </symbol>
+  </defs>
+  <rect x="1" y="1" width="1198" height="758" fill="#FFFFFF" stroke="#DDE1E7" stroke-width="2"/>
+  <text x="32" y="46" font-size="21" font-weight="700" fill="#12151A">Where each thing lives and what crosses each boundary</text>
+  <text x="32" y="70" font-size="14" fill="#454B55">numbered arrows: everything that goes out or comes in; the rest stays on the machine</text>
+  <rect x="24" y="90" width="330" height="520" fill="none" stroke="#DDE1E7" stroke-width="1.5"/>
+  <text x="36" y="110" font-size="13" font-weight="600" fill="#454B55" letter-spacing="0.5">INTERNET</text>
+  <rect x="390" y="90" width="786" height="520" fill="none" stroke="#86AEDB" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="402" y="110" font-size="13" font-weight="600" fill="#454B55" letter-spacing="0.5">TAILNET (TAILSCALE)</text>
+  <rect x="630" y="124" width="530" height="470" fill="none" stroke="#1F4E8C" stroke-width="1.5"/>
+  <text x="642" y="144" font-size="13" font-weight="600" fill="#454B55" letter-spacing="0.5">YOUR MACHINE OR SERVER</text>
+  <rect x="48" y="132" width="220" height="56" rx="4" fill="#FFFFFF" stroke="#86AEDB" stroke-width="1.5"/>
+  <use href="#cloud" x="58" y="142" width="36" height="36"/>
+  <text x="104" y="157" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">Pluggy</text>
+  <text x="104" y="176" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">Open Finance API</text>
+  <rect x="48" y="207" width="220" height="56" rx="4" fill="#FFFFFF" stroke="#86AEDB" stroke-width="1.5"/>
+  <use href="#cloud" x="58" y="217" width="36" height="36"/>
+  <text x="104" y="232" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">BrasilAPI</text>
+  <text x="104" y="251" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">CNPJ lookup</text>
+  <rect x="48" y="282" width="220" height="56" rx="4" fill="#FFFFFF" stroke="#86AEDB" stroke-width="1.5"/>
+  <use href="#cloud" x="58" y="292" width="36" height="36"/>
+  <text x="104" y="307" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">ntfy.sh</text>
+  <text x="104" y="326" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">secret topic</text>
+  <rect x="48" y="357" width="220" height="56" rx="4" fill="#FFFFFF" stroke="#86AEDB" stroke-width="1.5"/>
+  <use href="#cloud" x="58" y="367" width="36" height="36"/>
+  <text x="104" y="382" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">cdnjs and fonts</text>
+  <text x="104" y="401" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">Chart.js, Google Fonts</text>
+  <rect x="48" y="432" width="220" height="56" rx="4" fill="#FFFFFF" stroke="#86AEDB" stroke-width="1.5"/>
+  <use href="#lock" x="58" y="442" width="36" height="36"/>
+  <text x="104" y="457" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">Cloud folder</text>
+  <text x="104" y="476" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">.cms files only</text>
+  <path d="M630 160 H272" stroke="#1F4E8C" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <circle cx="372" cy="160" r="11" fill="#1F4E8C" stroke="#FFFFFF" stroke-width="2"/><text x="372" y="164" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+  <text x="404" y="151" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">HTTPS, API key</text>
+  <path d="M630 235 H272" stroke="#1F4E8C" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <circle cx="372" cy="235" r="11" fill="#1F4E8C" stroke="#FFFFFF" stroke-width="2"/><text x="372" y="239" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+  <text x="404" y="226" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">company CNPJ only</text>
+  <path d="M630 310 H272" stroke="#1F4E8C" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <circle cx="372" cy="310" r="11" fill="#1F4E8C" stroke="#FFFFFF" stroke-width="2"/><text x="372" y="314" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+  <text x="404" y="301" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">no amount or name</text>
+  <path d="M270 385 H628" stroke="#1F4E8C" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <circle cx="372" cy="385" r="11" fill="#1F4E8C" stroke="#FFFFFF" stroke-width="2"/><text x="372" y="389" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+  <text x="404" y="376" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">dashboard: script with SRI</text>
+  <path d="M630 460 H272" stroke="#1F4E8C" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <circle cx="372" cy="460" r="11" fill="#1F4E8C" stroke="#FFFFFF" stroke-width="2"/><text x="372" y="464" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
+  <text x="404" y="451" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">encrypted backup</text>
+  <rect x="650" y="170" width="158" height="64" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="1.5"/>
+  <use href="#key" x="658" y="182" width="36" height="36"/>
+  <text x="702" y="198" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">.env</text>
+  <text x="702" y="217" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">0600, not in git</text>
+  <rect x="822" y="170" width="158" height="64" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="1.5"/>
+  <use href="#cylinder" x="830" y="182" width="36" height="36"/>
+  <text x="874" y="198" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">data/</text>
+  <text x="874" y="217" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">0600, not in git</text>
+  <rect x="994" y="170" width="158" height="64" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="1.5"/>
+  <use href="#chart" x="1002" y="182" width="36" height="36"/>
+  <text x="1046" y="198" font-size="13" font-weight="600" fill="#12151A" text-anchor="start">dashboard.html</text>
+  <text x="1046" y="217" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">CSP and SRI, local</text>
+  <rect x="650" y="262" width="330" height="56" rx="4" fill="#FFFFFF" stroke="#86AEDB" stroke-width="1.5"/>
+  <use href="#lock" x="658" y="272" width="36" height="36"/>
+  <text x="704" y="286" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">backup_cert.pem</text>
+  <text x="704" y="305" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">public certificate: locks only</text>
+  <rect x="994" y="262" width="158" height="56" rx="4" fill="#FFFFFF" stroke="#86AEDB" stroke-width="1.5"/>
+  <text x="1010" y="286" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">umask 077</text>
+  <text x="1010" y="305" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">lock and atomic writes</text>
+  <text x="650" y="356" font-size="13" font-weight="600" fill="#454B55" text-anchor="start">PORTS, ONLY 127.0.0.1 OR THE TAILSCALE IP</text>
+  <rect x="650" y="368" width="158" height="56" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="1.5"/>
+  <use href="#server" x="658" y="378" width="36" height="36"/>
+  <text x="700" y="392" font-size="13" font-weight="600" fill="#12151A" text-anchor="start">Webhook :8082</text>
+  <text x="700" y="411" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">EMBER_BIND</text>
+  <rect x="822" y="368" width="158" height="56" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="1.5"/>
+  <use href="#server" x="830" y="378" width="36" height="36"/>
+  <text x="872" y="392" font-size="13" font-weight="600" fill="#12151A" text-anchor="start">ntfy :8081</text>
+  <text x="872" y="411" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">NTFY_BIND</text>
+  <rect x="994" y="368" width="158" height="56" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="1.5"/>
+  <use href="#server" x="1002" y="378" width="36" height="36"/>
+  <text x="1044" y="392" font-size="13" font-weight="600" fill="#12151A" text-anchor="start">Postgres :5432</text>
+  <text x="1044" y="411" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">127.0.0.1 only</text>
+  <rect x="650" y="452" width="502" height="44" rx="4" fill="#FFFFFF" stroke="#B23A3A" stroke-width="1.5"/>
+  <use href="#blocked" x="660" y="458" width="32" height="32"/>
+  <text x="702" y="479" font-size="14" font-weight="600" fill="#B23A3A" text-anchor="start">0.0.0.0: never. No port open to the internet.</text>
+  <use href="#phone" x="424" y="468" width="42" height="56"/>
+  <text x="474" y="492" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">Phone</text>
+  <text x="474" y="511" font-size="12" font-weight="400" fill="#454B55" text-anchor="start">ntfy app</text>
+  <path d="M560 540 H700 V426" stroke="#1F4E8C" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <circle cx="600" cy="540" r="11" fill="#1F4E8C" stroke="#FFFFFF" stroke-width="2"/><text x="600" y="544" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">6</text>
+  <text x="470" y="563" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">token in the header</text>
+  <path d="M150 545 H354" stroke="#B23A3A" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#arrow-red)"/>
+  <text x="160" y="535" font-size="13" font-weight="600" fill="#B23A3A" text-anchor="start">direct access</text>
+  <use href="#blocked" x="358" y="531" width="28" height="28"/>
+  <rect x="24" y="630" width="540" height="100" rx="4" fill="#FFFFFF" stroke="#1F4E8C" stroke-width="1.5"/>
+  <use href="#key" x="36" y="648" width="40" height="40"/>
+  <text x="88" y="662" font-size="14" font-weight="600" fill="#12151A" text-anchor="start">Password manager</text>
+  <text x="88" y="682" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">backup private key, off the machine</text>
+  <text x="88" y="702" font-size="13" font-weight="400" fill="#454B55" text-anchor="start">Postgres passwords and tokens, a copy</text>
+  <rect x="596" y="630" width="580" height="100" rx="4" fill="#FFFFFF" stroke="#B23A3A" stroke-width="1.5"/>
+  <text x="612" y="656" font-size="14" font-weight="600" fill="#B23A3A" text-anchor="start">Does not protect against</text>
+  <text x="612" y="680" font-size="13" font-weight="400" fill="#12151A" text-anchor="start">a compromised machine: whoever has your session reads data/ and .env</text>
+  <text x="612" y="702" font-size="13" font-weight="400" fill="#12151A" text-anchor="start">metadata on ntfy.sh: push time and topic name</text>
+  <text x="612" y="722" font-size="13" font-weight="400" fill="#12151A" text-anchor="start">an unlocked phone in someone else's hands</text>
+</svg>

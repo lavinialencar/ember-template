@@ -1,13 +1,13 @@
-# Scripts do Ember num servidor (NAS ou qualquer maquina ligada): rotina diaria e webhook dos botoes dos alertas.
-# Uso: docker compose -f docker-compose.scripts.yml up -d --build
-# O repo inteiro (com data/ e .env) fica montado em /app: o contêiner le e escreve os mesmos arquivos da pasta.
-# network_mode host: alcanca o Postgres em localhost:5432 (docker-compose.yml) e serve o webhook na porta 8082,
-# que so o Tailscale alcanca. No .env: ALERTA_WEBHOOK_URL=http://<servidor>.<tailnet>.ts.net:8082/alerta e
-# ALERTA_WEBHOOK_TOKEN=<segredo de 32+ caracteres; sem ele o webhook nao sobe>. TICKTICK_TOKEN (e TICKTICK_PROJECT_ID)
-# sao opcionais. O webhook so escuta em EMBER_BIND (padrao 127.0.0.1): no servidor, EMBER_BIND=<IP dele no Tailscale>
-# (`tailscale ip -4`), nunca 0.0.0.0. O contêiner roda sem root (usuario ember, uid 1000): o dono de ./ no servidor
-# precisa ser esse uid, ou troque EMBER_UID/EMBER_GID no build pra casar com o dono da pasta.
-# Fuso: EMBER_TZ (padrao America/Sao_Paulo).
+# Ember's scripts on a server (a NAS or any always-on machine): daily routine and alert button webhook.
+# Usage: docker compose -f docker-compose.scripts.yml up -d --build
+# The whole repo (with data/ and .env) is mounted at /app: the container reads and writes the same files as the folder.
+# network_mode host: reaches Postgres on localhost:5432 (docker-compose.yml) and serves the webhook on port 8082,
+# which only Tailscale reaches. In .env: ALERT_WEBHOOK_URL=http://<server>.<tailnet>.ts.net:8082/alert and
+# ALERT_WEBHOOK_TOKEN=<secret of 32+ characters; without it the webhook does not start>. TICKTICK_TOKEN (and TICKTICK_PROJECT_ID)
+# are optional. The webhook only listens on EMBER_BIND (default 127.0.0.1): on the server, EMBER_BIND=<its Tailscale IP>
+# (`tailscale ip -4`), never 0.0.0.0. The container runs without root (user ember, uid 1000): the owner of ./ on the server
+# must be that uid, or change EMBER_UID/EMBER_GID at build time to match the folder owner.
+# Time zone: EMBER_TZ (default America/Sao_Paulo).
 services:
   ember-scripts:
     build:

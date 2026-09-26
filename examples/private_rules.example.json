@@ -1,0 +1,34 @@
+{
+  "_comment": "Template with MADE-UP data. Copy to data/private_rules.json (outside git) and replace with your own. Each 'contains' is a snippet searched in the description and in the counterparty name, without accents and in lowercase. Your rules run before the generic ones.",
+  "owner": {
+    "document": "12345678900",
+    "names": ["fulana exemplo"]
+  },
+  "neutral": ["compra duplicada exemplo"],
+  "income": [
+    {"contains": "empresa exemplo", "type": "income", "category": "Salary"},
+    {"contains": "seguradora exemplo", "type": "reimbursement", "category": "Health"},
+    {"contains": "comprador exemplo", "type": "one_off_income", "category": "Used equipment sale", "amount_min": 290, "amount_max": 310},
+    {"contains": "cliente exemplo", "type": "income", "category": "Service provided", "scope": "business"}
+  ],
+  "patterns": [
+    {"contains": "academia exemplo", "category": "Subscription, gym", "essentiality": "discretionary"},
+    {"contains": "streaming exemplo", "category": "Subscription, streaming", "essentiality": "discretionary"},
+    {"contains": "energia exemplo", "category": "Housing, electricity", "essentiality": "committed_fixed"},
+    {"contains": "grafica modelo", "category": "Work supplies", "essentiality": "discretionary", "scope": "business"}
+  ],
+  "splits": [
+    {
+      "contains": "imobiliaria exemplo",
+      "parts": [
+        {"share": 0.5, "type": "expense", "category": "Housing, rent", "essentiality": "committed_fixed"},
+        {"share": 0.5, "type": "neutral", "category": "Housemate's share"}
+      ]
+    }
+  ],
+  "subscription_groups": [
+    {"group": "Streaming", "contains": "streaming exemplo"},
+    {"group": "Gym", "contains": "academia exemplo"},
+    {"group": "Movies (one-off)", "contains": "cinema modelo", "sporadic": true}
+  ]
+}

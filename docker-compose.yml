@@ -1,12 +1,12 @@
 services:
   postgres:
-    image: postgres:16.15-alpine   # versao fixa; trocar so a minor, a major 16 e a do volume
+    image: postgres:16.15-alpine   # pinned version; only bump the minor, major 16 is the volume's
     container_name: ember-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ember
       POSTGRES_USER: ember
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     volumes:
       - ember_pg:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d:ro
@@ -36,5 +36,5 @@ services:
 volumes:
   ember_pg:
 
-# Se o n8n (n8n/carga-diaria.json) roda em outro stack, junte este serviço na rede
-# Docker dele (ou use host networking), senão o n8n não alcança o Postgres pelo nome.
+# If n8n (n8n/daily-load.json) runs in another stack, join this service to its Docker
+# network (or use host networking), otherwise n8n cannot reach Postgres by name.

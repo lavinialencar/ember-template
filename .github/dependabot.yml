@@ -4,7 +4,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
-  # imagens do docker-compose.yml, docker-compose.ntfy.yml e docker-compose.scripts.yml, e o FROM do Dockerfile.scripts
+  # images in docker-compose.yml, docker-compose.ntfy.yml and docker-compose.scripts.yml, and the FROM in Dockerfile.scripts
   - package-ecosystem: docker-compose
     directory: /
     schedule:

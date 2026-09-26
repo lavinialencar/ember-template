@@ -1,43 +1,43 @@
-# Instruções pra assistentes de código
+# Instructions for coding assistants
 
-Vale pra qualquer assistente de IA trabalhando neste repositório ou num fork dele (Claude Code, Codex, Cursor, Gemini CLI e outros).
+This applies to any AI assistant working in this repository or in a fork of it (Claude Code, Codex, Cursor, Gemini CLI and others).
 
-## Regras que não se dobram
+## Rules that do not bend
 
-- **Nunca leia, imprima, resuma ou copie nada de `data/` nem do `.env`.** Ali mora o extrato, as regras e o cadastro pessoais, e os segredos. Isso inclui `cat`, `head`, `grep`, abrir no editor e rodar script que imprime o conteúdo. Se precisar de dado pra testar, use a demo numa cópia separada ou os testes.
-- **Nunca rode `gerar_exemplo.py --forcar`** na pasta de quem usa o Ember de verdade: ele sobrescreve `data/`.
-- **Nunca commite** `data/`, `.env`, `*.pem`, `*.key`, `*.cms` nem `data/painel.html`. Não use `git add -f` nem `git add -A` sem conferir o `git status`.
-- **Nunca ponha dado real em código, teste, exemplo, doc, issue ou mensagem de commit.** Dado de exemplo é inventado: "Exemplo" e "Modelo" nos nomes, e-mail em `example.com`, UUID começando com `00000000-0000-`, CPF inválido.
-- **Nunca troque um bind pra `0.0.0.0`**, nem sugira abrir porta pra internet.
-- **Não chame a API da Pluggy, o ntfy ou o TickTick** sem pedido explícito de quem usa. Os scripts sem `--sem-api` e sem `--sem-push` fazem isso.
+- **Never read, print, summarize or copy anything from `data/` or `.env`.** That is where the personal statement, rules and manual records live, and the secrets. This includes `cat`, `head`, `grep`, opening in an editor and running a script that prints the content. If you need data to test, use the demo in a separate copy, or the tests.
+- **Never run `make_demo.py --force`** in the folder of someone who uses Ember for real: it overwrites `data/`.
+- **Never commit** `data/`, `.env`, `*.pem`, `*.key`, `*.cms` or `data/dashboard.html`. Do not use `git add -f` or `git add -A` without checking `git status`.
+- **Never put real data in code, tests, examples, docs, issues or commit messages.** Example data is made up: "Exemplo" and "Modelo" in names, email at `example.com`, UUID starting with `00000000-0000-`, an invalid CPF (individual taxpayer ID).
+- **Never change a bind to `0.0.0.0`**, and never suggest opening a port to the internet.
+- **Do not call the Pluggy (Open Finance data aggregator) API, ntfy or TickTick** without an explicit request from the user. The scripts do this when run without `--no-api` and `--no-push`.
 
-## Antes de cada commit
+## Before each commit
 
 ```sh
 python3 -m unittest discover -s tests
-python3 tools/checar_dados_pessoais.py
+python3 tools/check_personal_data.py
 ```
 
-Os dois precisam passar. Se a trava acusar algo, não contorne: tire o dado.
+Both must pass. If the guard flags something, do not work around it: remove the data.
 
-## Onde as coisas moram
+## Where things live
 
-| O quê | Onde |
+| What | Where |
 |---|---|
-| regras genéricas de classificação | `scripts/fluxo.py`, `scripts/enriquecer_cnpj.py` |
-| regras pessoais | `data/regras_privadas.json` (não leia); modelo em `exemplos/` |
-| o que a API não traz | `data/cadastro_manual.json` (não leia); modelo em `exemplos/` |
-| validação dos dois JSON pessoais | `scripts/config_privada.py` |
-| a rotina, em ordem | `scripts/atualizar.py` |
-| alertas e push | `scripts/alertas.py`, `scripts/notificar.py`, `scripts/suspeitas.py` |
-| webhook e agendador | `scripts/agendador.py` |
-| painel | `scripts/painel_dados.py`, `scripts/painel_template.html`, `scripts/painel_montar.py` |
-| Postgres | `sql/`, uma migration nova por mudança |
-| guias | `docs/`, numerados; diagramas em `assets/` |
+| generic classification rules | `scripts/classify.py`, `scripts/enrich_cnpj.py` |
+| personal rules | `data/private_rules.json` (do not read); template in `examples/` |
+| what the API does not provide | `data/manual_records.json` (do not read); template in `examples/` |
+| validation of the two personal JSON files | `scripts/private_config.py` |
+| the routine, in order | `scripts/update.py` |
+| alerts and push | `scripts/alerts.py`, `scripts/notify.py`, `scripts/suspicious.py` |
+| webhook and scheduler | `scripts/scheduler.py` |
+| dashboard | `scripts/dashboard_data.py`, `scripts/dashboard_template.html`, `scripts/dashboard_build.py` |
+| Postgres | `sql/`, one new migration per change |
+| guides | `docs/`, numbered; diagrams in `assets/` |
 
-## Estilo
+## Style
 
-- Python só com biblioteca padrão. Nada de dependência nova.
-- Texto de código, comentário e doc em português do Brasil, frase curta.
-- O push nunca leva valor, nome de loja, de pessoa, de cartão ou de banco. Mantenha assim.
-- Mudou comportamento, atualize o guia em `docs/` no mesmo commit.
+- Python with the standard library only. No new dependencies.
+- Code, comments and docs in plain English, short sentences.
+- The push never carries an amount, or the name of a store, person, card or bank. Keep it that way.
+- Changed behavior, update the guide in `docs/` in the same commit.

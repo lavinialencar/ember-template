@@ -1,0 +1,480 @@
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js '__CSP_SCRIPT_HASH__'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Ember dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
+<style>
+:root{
+  --ink:#12151A; --ink2:#454B55; --ink3:#7A818C; --rule:#DDE1E7; --paper:#FFFFFF; --ground:#F4F5F7;
+  --accent:#1F4E8C; --accent-soft:#E4EDF8;
+  --b1:#0F2E57; --b2:#1F4E8C; --b3:#3F78BD; --b4:#86AEDB; --b5:#C4D7EE;
+  --in1:#2F7D5A; --in2:#6FAF92; --in3:#B4D9C6; --good:#2F7D5A; --bad:#B23A3A;
+  --empty:#ECEEF2; --empty-b:#9AA1AD;
+  --display:'Archivo','Helvetica Neue',Arial,sans-serif; --body:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#ECEEF2; --ink2:#B4BAC4; --ink3:#8A919C; --rule:#2E343D; --paper:#171B21; --ground:#0F1216;
+    --accent:#8FB4E6; --accent-soft:#1B2A40;
+    --b1:#BFD6F3; --b2:#8FB4E6; --b3:#5F92D0; --b4:#3B6BA6; --b5:#24446F;
+    --in1:#7CCBA2; --in2:#4E9C76; --in3:#2F6B50; --good:#7CCBA2; --bad:#E58F8F;
+    --empty:#232830; --empty-b:#6B7480;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#ECEEF2; --ink2:#B4BAC4; --ink3:#8A919C; --rule:#2E343D; --paper:#171B21; --ground:#0F1216;
+  --accent:#8FB4E6; --accent-soft:#1B2A40;
+  --b1:#BFD6F3; --b2:#8FB4E6; --b3:#5F92D0; --b4:#3B6BA6; --b5:#24446F;
+  --in1:#7CCBA2; --in2:#4E9C76; --in3:#2F6B50; --good:#7CCBA2; --bad:#E58F8F;
+  --empty:#232830; --empty-b:#6B7480;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:24px 72px}
+.sheet{max-width:1120px;margin:0 auto}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,5vw,46px);line-height:1.02;margin:0 0 8px;letter-spacing:-.02em}
+h2{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.15;margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 8px}
+p{margin:0 0 10px;max-width:none}
+html{scroll-behavior:smooth}
+.head{background:var(--paper);padding:clamp(18px,3vw,32px) clamp(18px,3vw,32px) 12px}
+.head h1{margin:0 0 4px}
+.meta{margin:0;font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--ink3);max-width:none}
+.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;overflow-x:auto;padding:0 clamp(12px,2.6vw,28px);border-bottom:1px solid var(--rule)}
+.toc a{flex:none;font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--ink2);text-decoration:none;padding:11px 12px 9px;border-bottom:2px solid transparent}
+.toc a:hover{color:var(--accent)}
+.toc a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.toc a.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.top{background:var(--paper);padding:2px clamp(18px,3vw,32px) clamp(18px,3vw,28px);border-bottom:3px solid var(--ink)}
+section{scroll-margin-top:52px}
+.band{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-size:22px;margin:30px 0 10px;padding-top:14px;border-top:1px solid var(--rule)}
+.band span{font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.kpis{margin-top:4px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--rule)}
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.attention{margin-top:26px;margin-bottom:10px}
+.attention .ttl .rec{color:var(--ink3);text-transform:none;letter-spacing:0;font-family:var(--body);font-size:12px;margin-left:12px}
+.attention .ttl{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--bad);font-weight:500;margin-bottom:20px}
+.attention .items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(var(--rows,3),auto);grid-auto-flow:column;gap:26px 56px}
+@media (max-width:760px){.attention .items{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-flow:row}}
+.attention .it{display:flex;gap:16px;align-items:flex-start;min-width:0}
+.attention .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center}
+.attention .tx{display:flex;flex-direction:column;gap:4px;min-width:0;padding-top:2px}
+.attention .tx b{font-size:14px;font-weight:600;color:var(--ink)}
+.attention .tx span{font-size:13px;color:var(--ink2);line-height:1.5}
+.attention .it.overdue .num{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.attention .it.overdue .tx b,.attention .it.overdue .tx span{color:var(--bad)}
+.attention .it.overdue .tx span{font-weight:600}
+.kpi{background:var(--paper);padding:16px 18px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.kpi .l{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+.kpi .n{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:26px;line-height:1.1;font-weight:600;letter-spacing:-.01em;margin-top:4px;white-space:nowrap}
+.kpi .ln{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:8px}
+.kpi .m{font-family:var(--mono);font-size:11px;color:var(--ink2)}
+.kpi .spark{display:block;width:100%;height:28px;margin-top:12px}
+.chip{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.02em;padding:2px 7px;white-space:nowrap;background:var(--ground);color:var(--ink2)}
+.chip.good{color:var(--good);background:color-mix(in srgb,var(--good) 13%,transparent)}
+.chip.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,transparent)}
+.caveat{font-size:12px;color:var(--ink3);margin:10px 0 0;max-width:none;line-height:1.5}
+.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+section{background:var(--paper);margin-top:16px;padding:clamp(18px,3vw,32px)}
+.sub{color:var(--ink2);margin-bottom:40px;max-width:none}
+h3 + .note{margin-bottom:28px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:36px 72px;align-items:stretch}
+.two > div{display:flex;flex-direction:column;min-width:0}
+.box{position:relative;width:100%;flex:1 1 auto;max-height:520px}
+.box.donut{flex:none;height:300px;max-width:440px;margin-inline:auto}
+.box.fixed{flex:none;height:310px}
+.list.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:0 72px}
+.zone{margin-top:44px;padding-top:28px;border-top:1px solid var(--rule)}
+.tall{min-height:340px}.mid{min-height:280px}.short{min-height:220px}
+.box > canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.list{margin:0;padding:0;list-style:none}
+.list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 16px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.list .name{font-weight:600}
+.list .det{grid-column:1 / -1;font-size:13px;color:var(--ink2)}
+.list .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;text-align:right}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;background:var(--ground);color:var(--ink2);margin-left:6px;vertical-align:1px}
+.tag.new{background:var(--accent-soft);color:var(--accent)}
+.tag.crit{color:var(--bad)}
+.callout{background:var(--ground);padding:14px 18px;margin:16px 0 0;max-width:none}
+.callout p:last-child{margin-bottom:0}
+.note{font-size:14px;color:var(--ink2);max-width:none;line-height:1.6}
+.insight{font-size:14px;color:var(--ink2);margin:18px 0 0;max-width:none;line-height:1.6}
+.two.center{align-items:center}
+.box.big{height:340px}
+.box.free{max-height:none}
+.rl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 28px}
+.rl .box.donut{flex:none;width:200px;height:200px;max-width:none;margin:0}
+.rl .leg{flex:1 1 210px;flex-direction:column;gap:12px;margin-top:0;font-size:14px}
+.three{display:grid;grid-template-columns:300px minmax(0,1fr);gap:36px 88px;align-items:start;margin-top:34px}
+.ff{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px 36px;max-width:820px}
+.three h3{margin-bottom:18px}
+.box.plain{flex:none;height:300px;max-height:none}
+.cov{display:flex;flex-direction:column;align-items:center;text-align:center}
+.cov h3{margin-bottom:38px}
+.cov .leg{margin-top:36px;justify-content:center;flex-direction:column;gap:16px}
+.three .box.donut{width:210px;height:210px;max-width:none;margin:0}
+@media (max-width:900px){.three{grid-template-columns:1fr}.ff{grid-template-columns:1fr}}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink2);margin-top:8px}
+.leg span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:6px;background:var(--k);vertical-align:-1px}
+.leg span.empty::before{border:1px dashed var(--empty-b)}
+.footer{margin-top:16px;padding:16px 22px;background:var(--paper);font-size:14px;color:var(--ink2)}
+.footer p{max-width:none;margin:0 0 6px}
+@media (max-width:640px){ h2{font-size:21px} .tall{min-height:300px} }
+</style>
+
+<div class="sheet">
+  <div class="head">
+    <h1>Ember dashboard</h1>
+    <p class="meta" id="meta"></p>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#monthly">Month by month</a><a href="#spending">Where it goes</a><a href="#cards">Cards</a><a href="#subscriptions">Subscriptions</a><a href="#debts">Debts</a><a href="#income">Income</a><a href="#points">Points</a><a href="#rules">Rules</a>
+  </nav>
+  <div class="top">
+    <div class="attention" id="attention"></div>
+    <h2 class="band">This month <span id="band-current"></span></h2>
+    <div class="kpis" id="kpis-month"></div>
+    <p class="caveat" id="caveat-month"></p>
+    <h2 class="band">Last month <span id="band-prev"></span></h2>
+    <div class="kpis" id="kpis"></div>
+    <p class="caveat" id="caveat-prev"></p>
+  </div>
+
+  <section id="monthly"></section>
+  <section id="spending"></section>
+  <section id="cards"></section>
+  <section id="subscriptions"></section>
+  <section id="debts"></section>
+  <section id="income"></section>
+  <section id="points"></section>
+  <section id="rules"></section>
+
+  <div class="footer">
+    <p><span class="lbl">How to read this</span></p>
+    <p id="footer-txt"></p>
+  </div>
+</div>
+
+<script>
+const D = __DATA__;
+const $ = id => document.getElementById(id);
+const num = n => Math.round(n).toLocaleString('en-US');
+const R = n => 'R$ ' + num(n);
+const R2 = n => 'R$ ' + (+n || 0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ml = ym => MON[+ym.slice(5)-1] + " '" + ym.slice(2,4);
+const dl = d => MON[+d.slice(5,7)-1] + ' ' + (+d.slice(8,10));
+const M = ym => D.months.find(x => x.month === ym);
+const ma = ym => MON[+ym.slice(5)-1];
+const dmy = iso => dl(iso) + ', ' + iso.slice(0,4);
+const addMonths = (ym,n) => { const k = +ym.slice(0,4)*12 + +ym.slice(5,7) - 1 + n; return Math.floor(k/12)+'-'+String(k%12+1).padStart(2,'0'); };
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+const sum = (xs, f) => xs.reduce((a,x) => a + (f(x) || 0), 0);
+/* escapes outside text (alerts, manual records, rules) before it goes into innerHTML;
+   numbers and fixed strings from the template itself do not need it, but escaping breaks nothing */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const NC = Math.max(D.closed.length, 1);
+const CUR = D.ref.current, PREV = D.ref.previous, PREV2 = D.ref.previous2, OPEN = D.ref.open;
+$('meta').textContent = 'Personal · updated ' + dmy(D.generated);
+$('band-current').textContent = ml(CUR) + ', in progress through ' + dl(D.generated);
+$('band-prev').textContent = ml(PREV) + ', closed';
+const incompl = D.months.filter(m => m.incomplete).map(m => ml(m.month));
+$('footer-txt').textContent = (incompl.length ? incompl.join(', ') + ' have incomplete history: the data starts earlier and the purchases on older bills are missing. ' : '') + ml(CUR) + ' is in progress. Spending is personal scope only: what your rules mark as business scope is left out and shown separately. New debt does not count as income. Refunds stay out of the spending charts.';
+const k1 = v => v >= 1000 ? (v/1000).toLocaleString('en-US',{maximumFractionDigits:1}) + 'k' : String(v);
+
+/* ---------- derived data ---------- */
+const dv = D.debts;
+const openBills = D.open_bills || [];
+const openBillsTot = sum(openBills, f => f.balance);
+const contractDebts = sum(dv.filter(d => d.type === 'contract'), d => d.to_pay);
+const informalTot = sum(dv.filter(d => d.type === 'informal'), d => d.to_pay);
+const cost12 = D.debt_cost_12m + D.debt_cost_open;
+const S = D.subscriptions;
+const recurTot = sum(S.items, i => i.amount);
+const spor12 = sum(S.sporadic, e => e.total12);
+const cov = D.coverage, nL = Math.max(cov.rule_rows + cov.gray_rows, 1), nV = Math.max(cov.rule_amount + cov.gray_amount, 1);
+
+/* ---------- texts and KPIs (theme independent) ---------- */
+const cur = M(PREV), prev = M(PREV2), now = M(CUR);
+const peakEq = D.closed.reduce((a,m) => M(m).equipment > (a ? M(a).equipment : 1000) ? m : a, '');
+const pc = (a,b) => b ? Math.round((a-b)/Math.abs(b)*100) : 0;
+const chip = (a, b, upIsGood, neutral) => {
+  const p = pc(a,b), arrow = p>0 ? '▲' : p<0 ? '▼' : '■';
+  if (neutral) return `<span class="chip" title="vs ${ml(PREV2)}">${arrow} ${Math.abs(p)}% ${p>0?'more':p<0?'less':'same'}</span>`;
+  const good = p===0 ? null : ((p>0)===upIsGood);
+  return `<span class="chip ${good===null?'':good?'good':'bad'}" title="vs ${ml(PREV2)}">${arrow} ${Math.abs(p)}% ${good===null?'same':good?'better':'worse'}</span>`;
+};
+const series = fn => D.months.filter(m => !m.incomplete && !m.partial).map(fn);
+const spark = (vals, color) => {
+  if (vals.length < 2) return '';
+  const w = 140, h = 26, mn = Math.min(...vals), mx = Math.max(...vals), sp = (mx-mn) || 1;
+  const pts = vals.map((v,i) => [ (i/(vals.length-1))*w, h-3-((v-mn)/sp)*(h-8) ]);
+  const line = pts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const last = pts[pts.length-1], c1 = color || 'var(--b3)', c2 = color ? 'var(--ink2)' : 'var(--b1)', fill = color ? 'var(--rule)' : 'var(--b5)';
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,${h} ${line} ${w},${h}" fill="${fill}" opacity=".7"/><polyline points="${line}" fill="none" stroke="${c1}" stroke-width="1.6" vector-effect="non-scaling-stroke"/><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="${c2}"/></svg>`;
+};
+const totClass = D.avg.fixed+D.avg.essential+D.avg.discretionary+D.avg.mixed+D.avg.gray;
+const pctGray = totClass ? Math.round(D.avg.gray/totClass*100) : 0;
+const netPrev = cur.salary-cur.spend, netPrev2 = prev.salary-prev.spend;
+const living = m => m.fixed + m.essential - m.debt_cost;
+const avgLiving = D.avg.fixed + D.avg.essential - D.avg.debt_cost;
+const tile = (l, n, ch, m, sp) => `<div class="kpi"><span class="l">${l}</span><span class="n">${n}</span><div class="ln">${ch||''}<span class="m">${m}</span></div>${sp||''}</div>`;
+const negR = v => (v<0?'− ':'') + R(Math.abs(v));
+const ref = txt => `<span class="chip ref">${txt}</span>`;
+
+const LEVEL = {overdue: 'overdue', warning: '', info: ''};
+const attentionItems = (D.alerts || []).slice(0, 5).map(a => [LEVEL[a.level] || '', a.title, a.short || a.detail])
+  .concat(contractDebts ? [['', 'Debt under contract', `${R(contractDebts)} in total, not counting open bills`]] : []);
+$('attention').innerHTML = `<div class="ttl">Needs attention today${D.read_on ? `<span class="rec">manual record items, read on ${dl(D.read_on)}</span>` : ''}</div>
+  <div class="items" style="--rows:${Math.max(Math.ceil(attentionItems.length/2),1)}">${attentionItems.length ? attentionItems.map((it,n) => `<div class="it ${it[0]}"><span class="num">${n+1}</span><div class="tx"><b>${esc(it[1])}</b><span>${esc(it[2])}</span></div></div>`).join('') : '<div class="it"><div class="tx"><span>Nothing needs action right now.</span></div></div>'}</div>`;
+
+$('kpis-month').innerHTML =
+  tile('Income', R(now.salary), ref('partial'), `${ma(PREV)}: ${R(cur.salary)}`) +
+  tile('Spending', R(now.spend), ref('partial'), `${ma(PREV)}: ${R(cur.spend)}`) +
+  tile('Net', negR(now.salary-now.spend), ref('partial'), `${ma(PREV)}: ${negR(netPrev)}`) +
+  tile('Cost of living', R(living(now)), ref('partial'), `${ma(PREV)}: ${R(living(cur))}`) +
+  tile('New debt', R(now.debt_inflow), ref(now.debt_inflow ? 'this month' : 'none so far'), `${ma(PREV)}: ${R(cur.debt_inflow)}`) +
+  tile('Debt cost', R(now.debt_cost), now.debt_cost ? `<span class="chip bad">has interest</span>` : ref('zero so far'), `${ma(PREV)}: ${R(cur.debt_cost)}`);
+$('caveat-month').textContent = `${ml(CUR)} is in progress: income and spending for the rest of the month are still missing. Spending adds what came due this month (bills) and the account up to today.` + (D.debt_cost_open ? ` The open ${ml(OPEN)} bill already has ${R(D.debt_cost_open)} in interest and charges.` : '');
+
+$('kpis').innerHTML =
+  tile('Income', R(cur.salary), chip(cur.salary, prev.salary, true), `avg ${R(D.avg.salary)}`, spark(series(m=>m.salary))) +
+  tile('Spending', R(cur.spend), chip(cur.spend, prev.spend, false), `avg ${R(D.avg.spend)}`, spark(series(m=>m.spend))) +
+  tile('Net', negR(netPrev), chip(netPrev, netPrev2, true), `avg ${negR(D.avg.salary-D.avg.spend)}`, spark(series(m=>m.salary-m.spend))) +
+  tile('Cost of living', R(living(cur)), chip(living(cur), living(prev), false), `avg ${R(avgLiving)}`, spark(series(living))) +
+  tile('New debt', R(cur.debt_inflow), chip(cur.debt_inflow, prev.debt_inflow, false, true), `avg ${R(D.avg.debt_inflow)}`, spark(series(m=>m.debt_inflow), 'var(--ink3)')) +
+  tile('Debt cost', R(cur.debt_cost), chip(cur.debt_cost, prev.debt_cost, false), `avg ${R(D.avg.debt_cost)}`, spark(series(m=>m.debt_cost)));
+$('caveat-prev').textContent = `The chips compare with ${ml(PREV2)}. Income is salary only: it leaves out the 13th salary, tax refunds, reimbursements, one-off income and ${R(cur.other)} of income not yet classified in ${ma(PREV)}. Spending is personal: what your rules mark as business scope was left out (${R(D.business.cost)} of cost and ${R(D.business.income)} of income over the ${NC} closed months). Marketplace purchases (Mercado Livre, AliExpress, Amazon) are mixed spending: home, personal and work in the same purchase. ${pctGray}% of spending is still unclassified. Cost of living is a floor: fixed and essential already classified, without the cost of debt.`;
+
+const avgGap = D.avg.spend - D.avg.salary;
+$('monthly').innerHTML = `
+  <h2>Money in and out, month by month</h2>
+  <p class="sub">On the left of each month, the income that came in. On the right, what went out, split by class. The diamond is new debt, which does not count as income.</p>
+  <div class="box tall"><canvas id="c-monthly" role="img" aria-label="Income and spending bars per month, with new debt marked"></canvas></div>
+  <p class="insight">Over the ${NC} closed months, average spending is ${R(D.avg.spend)} and salary is ${R(D.avg.salary)}. ${avgGap > 0 ? `The gap of ${R(avgGap)} a month came from new debt (${R(D.debt_inflow_12m)} in 12 months) or from savings.` : `On average ${R(-avgGap)} a month is left over.`} ${peakEq.length ? ml(peakEq) + ' is high because ' + R(M(peakEq).equipment) + ' of it is equipment, in one-off purchases.' : ''}</p>`;
+
+const hs = D.housing;
+const housingItems = (hs.rent.typical ? `<li><span class="name">Rent, a normal month</span><span class="v">${R(hs.rent.typical)}</span><span class="det">median of ${hs.rent.months} months with rent classified.</span></li>` : '') +
+  (hs.electricity.avg ? `<li><span class="name">Electricity, monthly average</span><span class="v">${R(hs.electricity.avg)}</span><span class="det">ranges from ${R(hs.electricity.min)} to ${R(hs.electricity.max)}, over ${hs.electricity.months} months.</span></li>` : '');
+const oneOffs = D.one_offs.filter(a => a.amount > 0);
+$('spending').innerHTML = `
+  <h2>Where the money goes</h2>
+  <p class="sub">Monthly average over the ${NC} closed months. The light part with a dashed outline is the gray zone, what has no rule yet. Mixed is marketplace purchases, which mix home, personal and work.</p>
+  <div class="two">
+    <div><h3>By class</h3><div class="rl"><div class="box donut"><canvas id="c-class" role="img" aria-label="Donut of spending by class"></canvas></div>
+      <div class="leg" id="leg-class"></div></div>
+      ${housingItems ? `<ul class="list" style="margin-top:14px">${housingItems}</ul>` : ''}</div>
+    <div><h3>Categories already classified</h3><div class="box mid"><canvas id="c-cat" role="img" aria-label="Bars by category"></canvas></div>
+      <p class="note" style="margin-top:8px">Spending paid outside the connected accounts (meal vouchers, cash) does not show up here.${oneOffs.length ? ' Outside the average: ' + oneOffs.map(a => esc(a.name)+' '+R(a.amount)).join('; ') + '.' : ''}</p>
+</div>
+  </div>`;
+
+const overLimit = D.cards.filter(c => c.limit && c.closed.length && c.closed[c.closed.length-1].total > c.limit);
+const fromApp = D.cards.filter(c => c.open_from_app);
+$('cards').innerHTML = `
+  <h2>Cards</h2>
+  <p class="sub">Closed bills by due date and the estimate of the open ${ml(OPEN)} bill, which is what has been posted and is not due yet.</p>
+  <div class="two">
+    <div><h3>Bill per card</h3><div class="box tall"><canvas id="c-cards" role="img" aria-label="Bills per card"></canvas></div>
+      <p class="note" style="margin-top:8px">${D.cards.some(c=>c.limit) ? 'Limits: ' + D.cards.filter(c=>c.limit).map(c=>esc(c.name)+' '+R(c.limit)).join(', ') + '. ' : ''}${fromApp.length ? 'Open bill read in the app (manual records): ' + fromApp.map(c=>esc(c.name)).join(', ') + '; the others are estimated from the statement. ' : 'Open bill estimated from the statement. '}${overLimit.map(c => `The last ${esc(c.name)} bill went over the limit.`).join(' ')}</p></div>
+    <div><h3>Installments already committed</h3><div class="box tall"><canvas id="c-future" role="img" aria-label="Future installments per month"></canvas></div>
+      <p class="note" style="margin-top:8px">A future commitment, not realized spending: ${R(sum(D.card_future.filter(f=>f.month>=addMonths(OPEN,1)), f=>f.amount))} from ${ml(addMonths(OPEN,1))} on.</p></div>
+  </div>`;
+
+$('subscriptions').innerHTML = `
+  <h2>Subscriptions</h2>
+  <p class="sub">The chart groups charges by the groups in your rules. Recurring per month, from the records: <span class="mono">${R2(recurTot)}</span>. Sporadic over 12 months: <span class="mono">${R2(spor12)}</span>.</p>
+  <div class="two">
+    <div><h3>Cost per month</h3><div class="box tall"><canvas id="c-subs" role="img" aria-label="Subscription cost per month"></canvas></div></div>
+    <div><h3>What is charging</h3><ul class="list" id="list-subs"></ul></div>
+  </div>`;
+$('list-subs').innerHTML =
+  S.items.map(i => `<li><span class="name">${esc(i.name)}</span><span class="v">${R2(i.amount)}</span><span class="det">${esc(i.detail)}</span></li>`).join('') +
+  S.sporadic.map(e => `<li><span class="name">${esc(e.name)}<span class="tag">sporadic</span></span><span class="v">${R2(e.total12)} in 12m</span><span class="det">total over 12 months</span></li>`).join('');
+
+const debtDetail = d => [
+  d.installment != null && d.installments_total ? `${d.installments_total} installments of ${R2(d.installment)}, ${d.installments_paid} paid` : 'balance from the manual records',
+  d.next_due ? 'next on ' + d.next_due : '', d.note].filter(Boolean).map(esc).join('. ');
+$('debts').innerHTML = `
+  <h2>Debts</h2>
+  <p class="sub">Balance of debts under contract: <span class="mono">${R2(contractDebts)}</span>. Plus overdue card bills still open, <span class="mono">${R2(openBillsTot)}</span> (estimated), which accrue interest${informalTot ? `, and ${R2(informalTot)} of informal debts` : ''}.</p>
+  <div class="two center">
+    <div><h3>How much is left to pay</h3><div class="box fixed big"><canvas id="c-debt" role="img" aria-label="Paid and left to pay per debt"></canvas></div></div>
+    <ul class="list">
+      ${openBills.length ? `<li><span class="name">Overdue bills still open<span class="tag crit">estimated</span></span><span class="v">${R2(openBillsTot)}</span><span class="det">${openBills.map(f => esc(f.card) + ' ' + ml(f.due.slice(0,7)) + ': ' + R2(f.balance) + ' of ' + R2(f.total)).join('; ')}. Inferred from the payments found in the statement. It goes to revolving credit, with high interest.</span></li>` : ''}
+      ${dv.map(d => `<li><span class="name">${esc(d.name)}${d.type === 'informal' ? '<span class="tag">informal</span>' : ''}</span><span class="v">${R2(d.to_pay)}</span><span class="det">${debtDetail(d)}</span></li>`).join('')}
+    </ul>
+  </div>
+  <div class="two center" style="margin-top:56px">
+    <div><h3>New debt and cost of debt</h3><div class="box fixed"><canvas id="c-debtmonth" role="img" aria-label="New debt and cost of debt per month"></canvas></div></div>
+    <div><p class="note">New debt is a loan, a payroll loan, Pix on credit and installment credit coming into the account. The cost is interest, fines, fees and IOF: ${R(cost12)} in 12 months, counting the open bill. The cards' revolving balance shows up in the month the bill is posted.</p></div>
+  </div>`;
+
+const RB = D.receivables;
+$('income').innerHTML = `
+  <h2>Income still to come</h2>
+  <p class="sub">A receivable is money that already has an owner and a date, read from the manual records. Salary and recurring income are left out.</p>
+  <div class="two">
+    <div><h3>Receivables</h3>${RB.length ? `<div class="box short"><canvas id="c-rec" role="img" aria-label="Installments received and to receive per receivable"></canvas></div>
+      <ul class="list" style="margin-top:14px">${RB.map(r => `<li><span class="name">${esc(r.name)}</span><span class="v">${r.received.length} of ${r.installments_total}</span><span class="det">${r.installments_total} installments of ${R2(r.installment)}, ${R2((r.installments_total - r.received.length) * r.installment)} to go${r.note ? '. ' + esc(r.note) : ''}</span></li>`).join('')}</ul>` : '<p class="note">No receivables in the manual records.</p>'}</div>
+    <div style="justify-content:center"><h3>Account yield</h3>
+      <p class="note">${R(D.interest_income.avg)} a month on average, ${R(D.interest_income.total)} over the ${NC} closed months. It is the yield on the balance and on savings pots, and it stays out of Income.</p></div>
+  </div>`;
+
+const P = D.points;
+const totPts = sum(P, p => p.brl);
+const dateDM = s => { const p = s.split('/'); return (p[2] || '9999') + '-' + p[1] + '-' + p[0]; };
+const first = P.filter(p => p.expires).sort((a,b) => dateDM(a.expires) < dateDM(b.expires) ? -1 : 1)[0];
+$('points').innerHTML = `
+  <h2>Points, miles and bonuses</h2>
+  <p class="sub">Read from the apps${D.read_on ? ' on ' + dl(D.read_on) : ''} and converted to reais in the manual records. Estimated total: <span class="mono">${R2(totPts)}</span>. A program with no value in reais shows up in points only.</p>
+  <div class="two">
+    <div><h3>Estimated value per program</h3><div class="box tall"><canvas id="c-points" role="img" aria-label="Estimated value in reais per points program"></canvas></div></div>
+    <div><h3>Balances</h3><ul class="list" id="list-points"></ul></div>
+  </div>
+  ${first ? `<p class="insight"><span class="tag crit">expires first</span> ${esc(first.program)}, on ${esc(first.expires)}.</p>` : ''}`;
+$('list-points').innerHTML = P.map(p => `<li><span class="name">${esc(p.program)}</span><span class="v">${p.pts ? num(p.pts)+' pts' : (p.brl ? R2(p.brl) : '')}</span><span class="det">${p.brl && p.pts ? 'about '+R2(p.brl)+'. ' : ''}${p.expires ? 'expires ' + esc(p.expires) + '. ' : ''}${esc(p.note)}</span></li>`).join('');
+
+$('rules').innerHTML = `
+  <h2>Rules, where things stand</h2>
+  <p class="sub">${(cov.gray_rows/nL*100).toFixed(0)}% of rows and ${(cov.gray_amount/nV*100).toFixed(0)}% of the amount are in the gray zone, about ${Math.round(cov.gray_rows/NC)} rows a month. Each new rule in data/private_rules.json brings that number down.</p>
+  <div class="three">
+    <div class="cov"><h3>Coverage by amount, ${NC} months</h3><div class="box donut"><canvas id="c-cov" role="img" aria-label="Amount with a rule and in the gray zone"></canvas></div><div class="leg" id="leg-cov"></div></div>
+    <div class="ff">
+    <div>
+      <h3>Done</h3>
+      <ul class="list">
+        <li><span class="name">Neutral kept out of spending</span><span class="det">transfers between your own accounts, bill payments, savings pots</span></li>
+        <li><span class="name">Income kept separate</span><span class="det">salary, 13th salary, tax refund, reimbursements, yield, one-off income</span></li>
+        <li><span class="name">Card cash month from the bill</span><span class="det">future installments out of spending</span></li>
+        <li><span class="name">Your rules</span><span class="det">${D.n_rules} counterparty, income and split rules</span></li>
+        <li><span class="name">Category code and CNPJ</span><span class="det">card merchant category code (MCC) and CNAE looked up by CNPJ</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>To do</h3>
+      <ul class="list">
+        <li><span class="name">Gray zone</span><span class="det">what no rule catches safely; review it and turn it into rules</span></li>
+        <li><span class="name">Scope</span><span class="det">what is personal and what is business, per merchant (a rule with business scope)</span></li>
+        <li><span class="name">Pix with other people</span><span class="det">received and sent, per counterparty</span></li>
+      </ul>
+    </div>
+    </div>
+  </div>`;
+
+/* ---------- charts ---------- */
+const charts = [];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function draw(){
+  charts.splice(0).forEach(c => c.destroy());
+  const k = {ink:css('--ink'), ink2:css('--ink2'), ink3:css('--ink3'), rule:css('--rule'), acc:css('--accent'), paper:css('--paper'),
+    in1:css('--in1'), in2:css('--in2'), in3:css('--in3'), neg:css('--bad'),
+    b1:css('--b1'), b2:css('--b2'), b3:css('--b3'), b4:css('--b4'), b5:css('--b5'), vz:css('--empty'), vzb:css('--empty-b')};
+  const cycle = [k.b1, k.b2, k.b3, k.b4, k.b5];
+  Chart.defaults.font.family = "'IBM Plex Sans', Arial, sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = k.ink2;
+  Chart.defaults.borderColor = k.rule;
+  Chart.defaults.animation = false;
+  Chart.defaults.maintainAspectRatio = false;
+  Chart.defaults.plugins.legend.labels.boxWidth = 10;
+  Chart.defaults.plugins.legend.labels.boxHeight = 10;
+  Chart.defaults.plugins.tooltip.callbacks.label = c => ` ${c.dataset.label}: ${R(c.raw)}`;
+  const ticksR = {callback: v => k1(v)};
+  const axis = extra => Object.assign({grid:{color:k.rule}, border:{display:false}, ticks:ticksR}, extra||{});
+  const noGrid = {grid:{display:false}, border:{color:k.rule}, ticks:{maxRotation:0, minRotation:0, autoSkip:true, autoSkipPadding:16}};
+  /* "unclassified" and "to receive": light flat tone with a dashed outline, no texture */
+  const mk = (id, cfg) => {
+    cfg.data.datasets.forEach(ds => {
+      const bg = ds.backgroundColor, arr = Array.isArray(bg) ? bg : null;
+      if ((arr && arr.includes(k.vz)) || bg === k.vz) {
+        const base = ds.borderColor;
+        ds.borderColor = arr ? arr.map((c,i) => c === k.vz ? k.vzb : (Array.isArray(base) ? base[i] : base || c)) : k.vzb;
+        ds.borderWidth = 1.2; ds.borderDash = [4,3];
+      }
+    });
+    const el = $(id); if (el) charts.push(new Chart(el, cfg));
+  };
+
+  /* monthly */
+  const months = D.months;
+  const lbl = months.map(m => m.incomplete ? [ml(m.month),'incomplete'] : m.partial ? [ml(m.month),'in progress'] : ml(m.month));
+  mk('c-monthly', {type:'bar', data:{labels:lbl, datasets:[
+    {label:'Salary', data:months.map(m=>m.salary), backgroundColor:k.in1, stack:'in'},
+    {label:'13th salary', data:months.map(m=>m.bonus13), backgroundColor:k.in2, stack:'in'},
+    {label:'One-off and reimbursement', data:months.map(m=>m.one_off+m.reimbursement), backgroundColor:k.in3, stack:'in'},
+    {label:'Fixed', data:months.map(m=>m.fixed), backgroundColor:k.b1, stack:'out'},
+    {label:'Essential variable', data:months.map(m=>m.essential), backgroundColor:k.b2, stack:'out'},
+    {label:'Discretionary', data:months.map(m=>m.discretionary), backgroundColor:k.b3, stack:'out'},
+    {label:'Mixed', data:months.map(m=>m.mixed), backgroundColor:k.b4, stack:'out'},
+    {label:'Unclassified', data:months.map(m=>m.gray), backgroundColor:k.vz, stack:'out'},
+    {type:'line', label:'New debt', data:months.map(m=>m.debt_inflow||null), showLine:false, pointStyle:'rectRot', pointRadius:7, pointBackgroundColor:k.neg, pointBorderColor:k.paper, pointBorderWidth:1.5, order:0},
+  ]}, options:{plugins:{legend:{position:'bottom'}}, scales:{x:Object.assign({stacked:true}, noGrid), y:axis({stacked:true, beginAtZero:true})}}});
+
+  /* class */
+  const a = D.avg, tot = totClass || 1;
+  const names = ['Committed fixed','Essential variable','Discretionary','Mixed','Unclassified'], vals = [a.fixed,a.essential,a.discretionary,a.mixed,a.gray];
+  mk('c-class', {type:'doughnut', data:{labels:names, datasets:[{data:vals, backgroundColor:[k.b1,k.b2,k.b3,k.b4,k.vz], borderColor:k.paper, borderWidth:2}]},
+    options:{cutout:'62%', plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${R(c.parsed)} a month (${(c.parsed/tot*100).toFixed(0)}%)`}}}}});
+  $('leg-class').innerHTML = names.map((n,i)=>`<span class="${i===4?'empty':''}" style="--k:${['var(--b1)','var(--b2)','var(--b3)','var(--b4)','var(--empty)'][i]}">${n} ${R(vals[i])}</span>`).join('');
+
+  /* categories */
+  mk('c-cat', {type:'bar', data:{labels:D.categories.map(c=>c.name), datasets:[{label:'Per month', data:D.categories.map(c=>c.amount), backgroundColor:k.b2}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:axis({beginAtZero:true}), y:noGrid}}});
+
+  /* cards */
+  if (D.cards.length) {
+    const dues = D.cards[0].closed.map(f => ml(f.due.slice(0,7))).concat([ml(OPEN) + ' open']);
+    mk('c-cards', {type:'bar', data:{labels:dues, datasets:D.cards.map((c,i)=>({label:c.name, backgroundColor:cycle[i % cycle.length], data:c.closed.map(f=>f.total).concat([c.open_estimate])}))},
+      options:{plugins:{legend:{position:'bottom'}}, scales:{x:noGrid, y:axis({beginAtZero:true})}}});
+  }
+  const fut = D.card_future.filter(f => f.month >= addMonths(OPEN,1));
+  mk('c-future', {type:'bar', data:{labels:fut.map(f=>ml(f.month)), datasets:[{label:'Installments', data:fut.map(f=>f.amount), backgroundColor:k.b4}]},
+    options:{plugins:{legend:{display:false}}, scales:{x:noGrid, y:axis({beginAtZero:true})}}});
+
+  /* subscriptions: one block per group in your rules; sporadic in the empty tone */
+  const sm = S.months, spo = new Set(S.sporadic.map(e => e.name));
+  mk('c-subs', {type:'bar', data:{labels:sm.map(m=>ml(m.month)), datasets:S.groups.map((g,i) => (
+    {label:g, data:sm.map(m=>m[g]), backgroundColor:spo.has(g) ? k.vz : cycle[i % cycle.length], stack:'a'}))},
+    options:{plugins:{legend:{position:'bottom'}}, scales:{x:Object.assign({stacked:true}, noGrid), y:axis({stacked:true, beginAtZero:true})}}});
+
+  /* debts */
+  mk('c-debt', {type:'bar', data:{labels:dv.map(d=>d.name).concat(openBillsTot ? ['Overdue bills (estimated)'] : []), datasets:[
+    {label:'Paid', data:dv.map(d=>d.paid), backgroundColor:k.in1},
+    {label:'Left to pay', data:dv.map(d=>d.to_pay).concat(openBillsTot ? [openBillsTot] : []), backgroundColor:dv.map(d => d.type === 'informal' ? k.b3 : k.b1).concat([k.neg])},
+  ]}, options:{indexAxis:'y', plugins:{legend:{position:'bottom'}}, scales:{x:axis({stacked:true, beginAtZero:true}), y:Object.assign({stacked:true}, noGrid)}}});
+  const mm = D.months.filter(m => !m.incomplete);
+  mk('c-debtmonth', {type:'bar', data:{labels:mm.map(m=>ml(m.month)), datasets:[
+    {type:'bar', label:'New debt', data:mm.map(m=>m.debt_inflow), backgroundColor:k.neg, yAxisID:'y', order:2},
+    {type:'line', label:'Debt cost', data:mm.map(m=>m.debt_cost), borderColor:k.ink2, backgroundColor:k.ink2, pointRadius:4, tension:.25, yAxisID:'y1', order:1},
+  ]}, options:{plugins:{legend:{position:'bottom'}}, scales:{x:noGrid, y:axis({beginAtZero:true, title:{display:true,text:'new debt'}}), y1:{position:'right', grid:{display:false}, border:{display:false}, beginAtZero:true, ticks:ticksR, title:{display:true,text:'cost'}}}}});
+
+  /* receivables */
+  mk('c-rec', {type:'bar', data:{labels:RB.map(r=>r.name), datasets:[
+    {label:'Received', data:RB.map(r=>r.received.length*r.installment), backgroundColor:k.in1},
+    {label:'To receive', data:RB.map(r=>(r.installments_total-r.received.length)*r.installment), backgroundColor:k.vz},
+  ]}, options:{indexAxis:'y', plugins:{legend:{position:'bottom'}}, scales:{x:axis({stacked:true, beginAtZero:true}), y:Object.assign({stacked:true}, noGrid)}}});
+
+  /* points */
+  const pv = P.filter(p => p.brl).sort((a,b) => b.brl - a.brl);
+  mk('c-points', {type:'bar', data:{labels:pv.map(p => p.program), datasets:[{label:'Estimated R$', data:pv.map(p=>p.brl), backgroundColor:pv.map(p => p === first ? k.in1 : k.in2)}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:axis({beginAtZero:true}), y:noGrid}}});
+
+  /* coverage */
+  mk('c-cov', {type:'doughnut', data:{labels:['With a rule','Unclassified'], datasets:[{data:[cov.rule_amount,cov.gray_amount], backgroundColor:[k.b1,k.vz], borderColor:k.paper, borderWidth:2}]},
+    options:{cutout:'62%', plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${R(c.parsed)} (${(c.parsed/nV*100).toFixed(0)}%)`}}}}});
+  $('leg-cov').innerHTML = `<span style="--k:var(--b1)">With a rule ${R(cov.rule_amount)} (${(cov.rule_amount/nV*100).toFixed(0)}%)</span><span class="empty" style="--k:var(--empty)">Unclassified ${R(cov.gray_amount)} (${(cov.gray_amount/nV*100).toFixed(0)}%)</span>`;
+}
+try {
+  const links = [...document.querySelectorAll('.toc a')];
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), {rootMargin:'-35% 0px -60% 0px'});
+  document.querySelectorAll('section').forEach(sc => io.observe(sc));
+} catch(e) {}
+draw();
+try {
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+  new MutationObserver(draw).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+} catch(e) {}
+</script>

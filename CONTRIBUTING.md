@@ -1,21 +1,21 @@
-# Contribuir
+# Contributing
 
-Obrigado por querer ajudar. Algumas regras curtas:
+Thanks for wanting to help. A few short rules:
 
-1. **Nunca use dado real.** Nem seu, nem de ninguém. Use a demo (`python3 scripts/gerar_exemplo.py`) e dado inventado: nomes com "Exemplo" ou "Modelo", e-mail em `example.com`, UUID começando com `00000000-0000-`, CPF inválido.
-2. **Só biblioteca padrão do Python.** Os scripts não têm dependência de terceiros, e isso é de propósito.
-3. **Regra genérica no código, regra pessoal no JSON.** O que vale pra qualquer pessoa no Brasil vai em `scripts/`. O que depende de quem você é vai em `data/regras_privadas.json`, que nunca sobe.
-4. **Antes de abrir o pull request:**
+1. **Never use real data.** Not yours, not anyone's. Use the demo (`python3 scripts/make_demo.py`) and made-up data: names with "Exemplo" or "Modelo", email at `example.com`, UUID starting with `00000000-0000-`, an invalid CPF (individual taxpayer ID).
+2. **Python standard library only.** The scripts have no third-party dependencies, and that is on purpose.
+3. **Generic rules in code, personal rules in JSON.** What applies to anyone in Brazil goes in `scripts/`. What depends on who you are goes in `data/private_rules.json`, which is never pushed.
+4. **Before you open the pull request:**
 
    ```sh
    python3 -m unittest discover -s tests
-   python3 tools/checar_dados_pessoais.py
+   python3 tools/check_personal_data.py
    ```
 
-   Os dois precisam passar. O CI roda os mesmos, mais a demo ponta a ponta e o `gitleaks`.
-5. **Mudou comportamento, mude o guia.** A documentação mora em `docs/`. Diagrama em `assets/`, em SVG escrito à mão.
-6. **Português do Brasil**, frase curta, segunda pessoa.
+   Both must pass. CI runs the same ones, plus the demo end to end and `gitleaks`.
+5. **Changed behavior, change the guide.** The documentation lives in `docs/`. Diagrams go in `assets/`, as hand-written SVG.
+6. **Plain English**, short sentences, second person.
 
-Falha de segurança não vai em issue: veja [SECURITY.md](SECURITY.md).
+Security vulnerabilities do not go in issues: see [SECURITY.md](SECURITY.md).
 
-O passo a passo completo está em [docs/10-desenvolver.md](docs/10-desenvolver.md).
+The full walkthrough is in [docs/10-development.md](docs/10-development.md).

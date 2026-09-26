@@ -1,19 +1,20 @@
-# segredos
+# secrets
 .env
 *.env
 !.env.example
 
-# dado financeiro, regras e cadastro pessoais, painel gerado, logs
+# financial data, personal rules and records, generated dashboard, logs
 data/
 
-# chaves e certificados do backup (so o exemplo de caminho fica no .env.example)
+# backup keys and certificates (only the example path stays in .env.example)
 *.pem
 *.key
 *.p12
-# backups criptografados
+# encrypted backups
 *.cms
 
-# notas privadas que nunca sobem
+# private notes that never go up
+docs/*-private.md
 docs/*-privado.md
 
 # Python

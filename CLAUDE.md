@@ -1,5 +1,5 @@
 # CLAUDE.md
 
-As instruções pra assistentes de código deste repositório estão em [AGENTS.md](AGENTS.md). Leia antes de qualquer coisa.
+The instructions for coding assistants in this repository are in [AGENTS.md](AGENTS.md). Read them before anything else.
 
 @AGENTS.md
