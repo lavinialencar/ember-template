@@ -2,7 +2,7 @@
 
 The dashboard is a single file, `data/dashboard.html`, that opens directly in your browser. It has no server, no login and no database. It follows the system's light or dark theme.
 
-![Demo dashboard](../assets/painel-demo.png)
+![Demo dashboard](../assets/dashboard-demo.png)
 
 ## What each section shows
 

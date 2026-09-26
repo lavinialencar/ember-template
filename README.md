@@ -23,7 +23,7 @@ Then open `data/dashboard.html` in your browser.
 - It refuses to overwrite a `data/` that already has `transactions.json`. Use `--force` only if that `data/` holds demo data. `--dest FOLDER` writes somewhere else.
 - The dashboard loads Chart.js from cdnjs and the fonts from Google Fonts. Without internet, the text shows up and the charts don't.
 
-![Demo dashboard](assets/painel-demo.png)
+![Demo dashboard](assets/dashboard-demo.png)
 
 ## Plug in your own
 
