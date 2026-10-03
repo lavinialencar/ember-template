@@ -1,5 +1,5 @@
 # Container for Ember's scripts (daily routine and alert button webhook), to run on an always-on server.
-FROM python:3.12.14-slim-bookworm
+FROM python:3.14.0-slim-bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client openssl ca-certificates tzdata \
     && rm -rf /var/lib/apt/lists/*
 # time zone of the daily routine and of TickTick; change it at build time or through EMBER_TZ in docker-compose.scripts.yml
