@@ -4,6 +4,8 @@ This project targets Brazilian bank accounts through Open Finance Brasil (Brazil
 
 Ember is a personal-finance pipeline for people with bank accounts in Brazil. It reads your statement and your credit card bills through Open Finance, using Pluggy (an Open Finance data aggregator) with the connection made through MeuPluggy (Pluggy's free personal connection app). It classifies each transaction with rules you control, pings your phone when something needs action, and builds an HTML dashboard that opens in your browser. Everything runs in plain Python with no installed dependencies, and your data stays in JSON files on your machine. Postgres, n8n and a home server are optional.
 
+**[See the live demo page →](https://lavinialencar.com.br/lab/ember/)**
+
 **Who it is for.** People who want to see their own money with their own rules, without giving a bank password to an app and without sending their statement to someone else's cloud. You need to know how to run a command in the terminal and edit a JSON file. It is not an app, it is not multi-user and it does not give financial advice.
 
 ![Ember architecture: banks, Pluggy, your machine, phone alerts, dashboard and encrypted backup](assets/architecture.svg)
