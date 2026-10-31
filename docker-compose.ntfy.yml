@@ -5,7 +5,7 @@
 # only the message id goes up to ntfy.sh, not the text.
 services:
   ntfy:
-    image: binwiederhier/ntfy:v2.28.0   # pinned version; Dependabot opens a PR when a new one comes out
+    image: binwiederhier/ntfy:v2.34.0   # pinned version; Dependabot opens a PR when a new one comes out
     container_name: ember-ntfy
     restart: unless-stopped
     command: ["serve"]
